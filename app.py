@@ -4,7 +4,6 @@ import numpy as np
 import io
 import zipfile
 import plotly.express as px
-import plotly.graph_objects as go
 
 # ---------------------------------------------------------
 # 1. KAMUS BAHASA (BILINGUAL DICTIONARY)
@@ -14,7 +13,7 @@ TEXTS = {
         "page_title": "Sistem Automasi Klimatologi MetMalaysia",
         "title": "Sistem Automasi Analisis Klimatologi",
         "subtitle": "Jabatan Meteorologi Malaysia (MetMalaysia) | Pejabat Meteorologi Sabah",
-        "desc": "Aplikasi ini memproses siri masa data AAWS kepada Format Borang Rekod Hujan Piawai dan Analisis Visual Interaktif.",
+        "desc": "Aplikasi ini memproses siri masa data AAWS kepada Format Borang Rekod Hujan Piawai, Audit Integriti WMO, dan Analisis Visual Interaktif.",
         "tab_home": "🏠 Utama / Panduan",
         "tab_rain": "🌧️ Hujan (Rainfall)",
         "tab_temp": "🌡️ Suhu (Temperature)",
@@ -39,7 +38,7 @@ TEXTS = {
         "page_title": "MetMalaysia Climatology Automation System",
         "title": "Climatology Analysis Automation System",
         "subtitle": "Malaysian Meteorological Department (MetMalaysia) | Sabah Meteorological Office",
-        "desc": "This application processes AAWS time-series data into Standard Rainfall Record Sheets and Interactive Visual Analytics.",
+        "desc": "This application processes AAWS time-series data into Standard Rainfall Record Sheets, WMO Integrity Audit, and Interactive Visual Analytics.",
         "tab_home": "🏠 Home / Guide",
         "tab_rain": "🌧️ Rainfall",
         "tab_temp": "🌡️ Temperature",
@@ -163,31 +162,60 @@ def process_multiple_aaws_files(files_list):
     return all_stations_data
 
 # ---------------------------------------------------------
-# 5. FUNGSI SEMAKAN DATA LENGKAP MENGIKUT WMO
+# 5. FUNGSI SEMAKAN DATA LENGKAP & AUDIT LOG MENGIKUT WMO
 # ---------------------------------------------------------
-def check_wmo_validity(series, rule):
-    if rule == "No Filter (Raw Data)":
-        return True
-    
+def evaluate_month_qc(series, rule):
     missing_count = series.isna().sum()
     
     # Kira hari hilang berturut-turut
     is_na = series.isna().astype(int)
     blocks = (is_na != is_na.shift()).cumsum()
     consecutive_na = is_na.groupby(blocks).transform('sum') * is_na
-    max_consecutive = consecutive_na.max()
+    max_consecutive = consecutive_na.max() if not consecutive_na.empty else 0
     
+    is_valid = True
     if rule == "WMO Standard (11/5 Rule)":
         if missing_count >= 11 or max_consecutive >= 5:
-            return False
+            is_valid = False
     elif rule == "Strict Rule (5/3 Rule)":
         if missing_count > 5 or max_consecutive > 3:
-            return False
+            is_valid = False
             
-    return True
+    return is_valid, missing_count, max_consecutive
 
 # ---------------------------------------------------------
-# 6. FUNGSI PENJANAAN BORANG EXCEL
+# 6. FUNGSI JANA AUDIT QC UNTUK SESUATU STESEN
+# ---------------------------------------------------------
+def generate_qc_audit_table(df_station, rule):
+    qc_records = []
+    month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+    
+    for yr in sorted(df_station['Year'].unique()):
+        df_yr = df_station[df_station['Year'] == yr]
+        pivot_num = df_yr.pivot(index='Day', columns='Month', values='Rainfall_Numeric')
+        pivot_num = pivot_num.reindex(index=range(1, 32), columns=range(1, 13))
+        
+        for m in range(1, 13):
+            col_data = pivot_num[m]
+            is_valid, miss_cnt, max_consec = evaluate_month_qc(col_data, rule)
+            
+            status_str = "✅ Valid" if is_valid else "❌ Incomplete"
+            if miss_cnt == 0:
+                status_str = "🟢 100% Complete"
+                
+            qc_records.append({
+                "Tahun": yr,
+                "Bulan": month_names[m-1],
+                "Hari Hilang (NA)": miss_cnt,
+                "Maks. Berturut-turut (Hari)": max_consec,
+                "Status Integriti": status_str,
+                "Tindakan Pengiraan": "Dikira (Abaikan NA)" if is_valid else "Ditolak (N.A Incomplete)"
+            })
+            
+    return pd.DataFrame(qc_records)
+
+# ---------------------------------------------------------
+# 7. FUNGSI PENJANAAN BORANG EXCEL
 # ---------------------------------------------------------
 def generate_excel_for_station(station_name, df_station, rule):
     output = io.BytesIO()
@@ -216,7 +244,7 @@ def generate_excel_for_station(station_name, df_station, rule):
             
             for m in range(1, 13):
                 col_data = pivot_num[m]
-                is_valid = check_wmo_validity(col_data, rule)
+                is_valid, _, _ = evaluate_month_qc(col_data, rule)
                 
                 if is_valid:
                     tot = col_data.sum(skipna=True)
@@ -254,7 +282,7 @@ def generate_excel_for_station(station_name, df_station, rule):
     return output
 
 # ---------------------------------------------------------
-# 7. STRUKTUR TAB UTAMA (HOME / RAINFALL / TEMP / QC)
+# 8. STRUKTUR TAB UTAMA (HOME / RAINFALL / TEMP / QC)
 # ---------------------------------------------------------
 tab_home, tab_rain, tab_temp, tab_qc = st.tabs([
     t["tab_home"], 
@@ -314,10 +342,23 @@ with tab_rain:
             min_yr = df_stesen['Year'].min()
             max_yr = df_stesen['Year'].max()
             
-            m1, m2, m3 = st.columns(3)
+            # Pengiraan Ringkasan Integriti & QC
+            qc_df_station = generate_qc_audit_table(df_stesen, qc_rule)
+            total_months = len(qc_df_station)
+            incomplete_months_count = (qc_df_station['Status Integriti'] == "❌ Incomplete").sum()
+            total_missing_days = df_stesen['Rainfall_Numeric'].isna().sum()
+            completeness_pct = ((len(df_stesen) - total_missing_days) / len(df_stesen)) * 100
+            
+            # 📊 KAD METRIK RINGKASAN INTEGRITI DATA
+            m1, m2, m3, m4 = st.columns(4)
             m1.metric(t["station_name"], selected_stesen)
             m2.metric(t["record_period"], f"{min_yr} - {max_yr}")
-            m3.metric("Jumlah Rekod Data", f"{len(df_stesen):,} baris")
+            m3.metric("Tahap Kesempurnaan Data", f"{completeness_pct:.1f}%")
+            m4.metric("Bulan Tidak Sah (Incomplete)", f"{incomplete_months_count} / {total_months} bln", delta=f"-{incomplete_months_count}" if incomplete_months_count > 0 else None, delta_color="inverse")
+            
+            # Kotak Amaran Pintar Jika Terdapat Bulan Incomplete
+            if incomplete_months_count > 0:
+                st.warning(f"⚠️ **Perhatian Pegawai:** Terdapat **{incomplete_months_count} bulan** yang gagal melepasi piawaian kesempurnaan data ({qc_rule}). Nilai jumlah bagi bulan-bulan tersebut ditandakan secara automatik sebagai `N.A (Incomplete)` pada borang Excel untuk mengelakkan ralat anggaran. Sila rujuk Tab **📋 Semakan Kualiti & WMO** untuk perincian.")
             
             # Sub-Tab: Borang Excel vs Visualisasi Interaktif
             sub_form, sub_plots = st.tabs([t["subtab_form"], t["subtab_charts"]])
@@ -392,7 +433,6 @@ with tab_rain:
                         labels={'Rainfall_Numeric': 'Jumlah Hujan (mm)', 'Year': 'Tahun'},
                         title=f"Trend Jumlah Hujan Tahunan bagi {selected_stesen} ({min_yr} - {max_yr})"
                     )
-                    # Tambah garisan purata normal
                     fig_trend.add_hline(
                         y=mean_val, 
                         line_dash="dash", 
@@ -427,9 +467,35 @@ with tab_temp:
 
 # === TAB 4: QC & WMO COMPLETENESS ===
 with tab_qc:
-    st.subheader("📋 Ringkasan Kesempurnaan Data & Standard WMO-No. 1203")
+    st.subheader("📋 Laporan Audit Kualiti Data & Piawaian WMO-No. 1203")
+    
     st.markdown("""
-    Garis panduan rasmi **WMO-No. 1203 (Calculation of Climate Normals)** menetapkan kriteria berikut:
+    Garis panduan rasmi **WMO-No. 1203 (Calculation of Climate Normals)** menetapkan:
     * **Peraturan 11/5 Hari (Data Bulanan):** Data bulanan dianggap tidak sah sekiranya mengandungi $\ge 11$ hari hilang atau $\ge 5$ hari hilang berturut-turut.
     * **Kriteria 80% (Normal 30-Tahun):** Pengiraan *Climate Normals* 30-tahun rasmi memerlukan sekurang-kurangnya 80% data bulanan yang lengkap ($\ge 24$ tahun daripada tempoh 30 tahun).
     """)
+    
+    if uploaded_files and 'stations_data' in locals() and stations_data:
+        st.divider()
+        qc_station_choice = st.selectbox("Pilih Stesen untuk Semakan Log QC:", options=list(stations_data.keys()), key="qc_select")
+        qc_table = generate_qc_audit_table(stations_data[qc_station_choice], qc_rule)
+        
+        # Penapis Paparan: Tunjuk Semua atau Bulan Gagal Sahaja
+        filter_col1, filter_col2 = st.columns([2, 1])
+        with filter_col1:
+            show_failed_only = st.checkbox("🔍 Paparkan Bulan Tidak Sah / Ada Data Hilang Sahaja", value=False)
+        
+        display_qc_table = qc_table[qc_table['Hari Hilang (NA)'] > 0] if show_failed_only else qc_table
+        
+        st.dataframe(display_qc_table, use_container_width=True)
+        
+        # Butang Muat Turun Log Audit QC
+        csv_buffer = display_qc_table.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Muat Turun Laporan Log Audit QC (.CSV)",
+            data=csv_buffer,
+            file_name=f"Log_Audit_QC_{qc_station_choice}.csv",
+            mime="text/csv"
+        )
+    else:
+        st.info("Sila muat naik fail data di bar sisi kiri untuk melihat laporan audit kesempurnaan data stesen.")
