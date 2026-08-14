@@ -6,7 +6,16 @@ import zipfile
 import plotly.express as px
 
 # ---------------------------------------------------------
-# 1. KAMUS BAHASA DWIBALAS LENGKAP (100% FULL TRANSLATION)
+# 1. TETAPAN HALAMAN & TEMA
+# ---------------------------------------------------------
+st.set_page_config(
+    page_title="MetMalaysia Climatology System",
+    layout="wide",
+    page_icon="🌤️"
+)
+
+# ---------------------------------------------------------
+# 2. KAMUS BAHASA (BILINGUAL DICTIONARY)
 # ---------------------------------------------------------
 TEXTS = {
     "BM": {
@@ -15,11 +24,12 @@ TEXTS = {
         "subtitle": "Jabatan Meteorologi Malaysia (MetMalaysia) | Pejabat Meteorologi Sabah",
         "desc": "Aplikasi ini memproses siri masa data AAWS kepada Format Borang Rekod Hujan Piawai, Audit Integriti WMO, dan Analisis Visual Interaktif.",
         
-        # Tabs
-        "tab_home": "🏠 Utama / Panduan",
-        "tab_rain": "🌧️ Hujan (Rainfall)",
-        "tab_temp": "🌡️ Suhu (Temperature)",
-        "tab_qc": "📋 Semakan Kualiti & WMO",
+        # Navigation
+        "nav_header": "🧭 Menu Navigasi",
+        "menu_home": "🏠 Utama & Panduan",
+        "menu_rain": "🌧️ Hujan (Rainfall)",
+        "menu_temp": "🌡️ Suhu (Temperature)",
+        "menu_qc": "📋 Semakan Kualiti & WMO",
         
         # Sidebar
         "sidebar_settings": "⚙️ Tetapan / Settings",
@@ -29,18 +39,20 @@ TEXTS = {
         "upload_success": "✅ Berjaya memuat naik {count} fail AAWS!",
         "qc_mode_label": "⚙️ Piawaian Penapisan Data Hilang (WMO):",
         
-        # Home Tab
-        "home_title": "📌 Panduan Penggunaan Sistem",
+        # Home Page
+        "home_title": "📌 Panduan Penggunaan & Standard WMO-No. 1203",
         "home_body": """
-        Selamat datang ke **Sistem Automasi Analisis Klimatologi MetMalaysia**. Sistem ini dibangunkan untuk membantu proses transformasi dan verifikasi data iklim secara automatik:
+        Selamat datang ke **Sistem Automasi Analisis Klimatologi MetMalaysia**. Sistem ini dibangunkan khusus untuk memudahkan pengurusan data iklim:
         
-        1. **Format Borang Standard:** Menukar data siri masa AAWS kepada Grid Rekod Hujan Harian Bulanan (JAN-DEC).
-        2. **Piawaian WMO-No. 1203:** Menyemak kesempurnaan data (*Data Completeness*) sebelum pengiraan statistik dilaksanakan.
-        3. **Visualisasi Interaktif:** Menjana visual matriks keamatan hujan (*Heatmap*) dan siri masa yang boleh di-*zoom* dan disesuaikan temanya.
+        * 📋 **Borang Piawai MetMalaysia:** Menjana jadual matriks harian bulanan (JAN-DEC) secara automatik bagi setiap tahun.
+        * 🛡️ **Penapisan Integriti WMO:** Mengesan data hilang (NA) mengikut ketetapan WMO-No. 1203 untuk mengelakkan ralat anggaran.
+        * 📈 **Visualisasi Interaktif:** Menyediakan Heatmap keamatan hujan dan analisis siri masa dengan pilihan penukar tema warna.
         """,
-        "home_info": "👈 Sila muat naik fail raw AAWS di bar sisi kiri untuk memulakan analisis.",
+        "home_wmo_box": "📄 **Dokumen Rujukan Rasmi WMO-No. 1203** sedia ada dalam sistem untuk panduan kiraan Climate Normals.",
+        "btn_download_wmo": "📥 Muat Turun Garis Panduan WMO-No. 1203 (PDF)",
+        "home_info": "👈 Sila muat naik fail raw AAWS di menu bar sisi kiri untuk memulakan pemprosesan.",
         
-        # Rainfall Tab
+        # Rainfall Page
         "stations_ready": "📌 {count} Stesen Tersedia",
         "download_zip": "📦 MUAT TURUN SEMUA STESEN (.ZIP)",
         "zip_filename": "Laporan_Klimatologi_Semua_Stesen.zip",
@@ -51,7 +63,7 @@ TEXTS = {
         "completeness_rate": "Tahap Kesempurnaan Data",
         "invalid_months": "Bulan Tidak Sah (Incomplete)",
         "alert_incomplete": "⚠️ **Perhatian Pegawai:** Terdapat **{count} bulan** yang gagal melepasi piawaian kesempurnaan data ({rule}). Nilai jumlah bagi bulan-bulan tersebut ditandakan secara automatik sebagai `N.A (Incomplete)` pada borang Excel untuk mengelakkan ralat anggaran.",
-        "subtab_form": "📄 Borang & Muat Turun",
+        "subtab_form": "📄 Borang Rekod & Muat Turun",
         "subtab_charts": "📈 Visualisasi & Analisis Interaktif",
         "download_excel": "📥 Muat Turun Borang Excel ({station})",
         "preview_title": "#### 🔍 Pratonton Data Terkini (20 Baris Terawal)",
@@ -71,11 +83,11 @@ TEXTS = {
         "trend_avg_label": "Purata",
         "norm_title": "Corak Purata Hujan Bulanan (Normal Profile) bagi {station}",
         
-        # Temperature Tab
+        # Temperature Page
         "temp_title": "🌡️ Modul Analisis Suhu Udara (Temperature)",
         "temp_desc": "Modul Suhu Udara sedang diselaraskan untuk menyokong format Maximum / Minimum Temperature mengikut garis panduan WMO.",
         
-        # QC Tab
+        # QC Page
         "qc_title": "📋 Laporan Audit Kualiti Data & Piawaian WMO-No. 1203",
         "qc_desc": """
         Garis panduan rasmi **WMO-No. 1203 (Calculation of Climate Normals)** menetapkan:
@@ -104,11 +116,12 @@ TEXTS = {
         "subtitle": "Malaysian Meteorological Department (MetMalaysia) | Sabah Meteorological Office",
         "desc": "This application processes AAWS time-series data into Standard Rainfall Record Sheets, WMO Integrity Audit, and Interactive Visual Analytics.",
         
-        # Tabs
-        "tab_home": "🏠 Home / Guide",
-        "tab_rain": "🌧️ Rainfall",
-        "tab_temp": "🌡️ Temperature",
-        "tab_qc": "📋 QC & WMO Completeness",
+        # Navigation
+        "nav_header": "🧭 Navigation Menu",
+        "menu_home": "🏠 Home & Guide",
+        "menu_rain": "🌧️ Rainfall",
+        "menu_temp": "🌡️ Temperature",
+        "menu_qc": "📋 QC & WMO Completeness",
         
         # Sidebar
         "sidebar_settings": "⚙️ Settings",
@@ -118,18 +131,20 @@ TEXTS = {
         "upload_success": "✅ Successfully uploaded {count} AAWS file(s)!",
         "qc_mode_label": "⚙️ Missing Data Standard (WMO):",
         
-        # Home Tab
-        "home_title": "📌 System User Guide",
+        # Home Page
+        "home_title": "📌 System User Guide & WMO-No. 1203 Standard",
         "home_body": """
         Welcome to the **MetMalaysia Climatology Analysis Automation System**. This application is designed to automate climate data processing and verification:
         
-        1. **Standard Record Sheets:** Converts AAWS time-series data into Monthly Daily Rainfall Grids (JAN-DEC).
-        2. **WMO-No. 1203 Compliance:** Automatically verifies *Data Completeness* before statistical metrics are calculated.
-        3. **Interactive Visual Analytics:** Generates zoomable Rainfall Intensity Matrix (*Heatmaps*) and time-series trends with customizable color palettes.
+        * 📋 **Standard MetMalaysia Sheets:** Automatically generates monthly daily record grids (JAN-DEC) for each year.
+        * 🛡️ **WMO Integrity Screening:** Screens missing data (NA) compliant with WMO-No. 1203 standards to prevent calculation bias.
+        * 📈 **Interactive Analytics:** Offers Rainfall Intensity Heatmaps and time-series trend analysis with customizable color palettes.
         """,
+        "home_wmo_box": "📄 **Official Reference: WMO-No. 1203 Guidelines** available in the system for Climate Normals calculation.",
+        "btn_download_wmo": "📥 Download WMO-No. 1203 Guidelines (PDF)",
         "home_info": "👈 Please upload raw AAWS files in the sidebar to begin analysis.",
         
-        # Rainfall Tab
+        # Rainfall Page
         "stations_ready": "📌 {count} Station(s) Available",
         "download_zip": "📦 DOWNLOAD ALL STATIONS (.ZIP)",
         "zip_filename": "All_Stations_Climatology_Reports.zip",
@@ -140,7 +155,7 @@ TEXTS = {
         "completeness_rate": "Data Completeness Rate",
         "invalid_months": "Invalid Months (Incomplete)",
         "alert_incomplete": "⚠️ **Officer Advisory:** There are **{count} month(s)** that do not meet the data completeness standard ({rule}). Total values for these months are automatically flagged as `N.A (Incomplete)` on the Excel sheet to prevent underestimation bias.",
-        "subtab_form": "📄 Sheets & Download",
+        "subtab_form": "📄 Record Sheets & Download",
         "subtab_charts": "📈 Interactive Analytics & Charts",
         "download_excel": "📥 Download Excel Report ({station})",
         "preview_title": "#### 🔍 Raw Data Preview (First 20 Records)",
@@ -160,11 +175,11 @@ TEXTS = {
         "trend_avg_label": "Average",
         "norm_title": "Monthly Average Rainfall Pattern (Normal Profile) for {station}",
         
-        # Temperature Tab
+        # Temperature Page
         "temp_title": "🌡️ Air Temperature Analysis Module",
         "temp_desc": "The Temperature Module is being integrated to support Maximum / Minimum Temperature parameters compliant with WMO standards.",
         
-        # QC Tab
+        # QC Page
         "qc_title": "📋 Data Quality Audit Report & WMO-No. 1203 Standards",
         "qc_desc": """
         Official **WMO-No. 1203 Guidelines (Calculation of Climate Normals)** state:
@@ -190,36 +205,24 @@ TEXTS = {
 }
 
 # ---------------------------------------------------------
-# 2. TETAPAN HALAMAN & TOGGLE BAHASA
+# 3. SIDEBAR: TETAPAN & NAVIGASI MENU UTAMA
 # ---------------------------------------------------------
-st.set_page_config(
-    page_title="MetMalaysia Climatology System",
-    layout="wide",
-    page_icon="🌤️"
-)
-
-st.sidebar.header("⚙️ Tetapan / Settings")
+st.sidebar.header(TEXTS["BM"]["sidebar_settings"])
 selected_lang = st.sidebar.selectbox("🌐 Bahasa / Language", options=["Bahasa Melayu", "English"])
 lang_key = "BM" if selected_lang == "Bahasa Melayu" else "EN"
 t = TEXTS[lang_key]
 
-# ---------------------------------------------------------
-# 3. HEADER RASMI DENGAN LOGO METMALAYSIA
-# ---------------------------------------------------------
-col_logo, col_title = st.columns([1.5, 6])
+st.sidebar.divider()
 
-with col_logo:
-    try:
-        st.image("logo_met.png", width=170)
-    except:
-        st.write("🌤️")
+# Menu Navigasi Utama di Sebelah Kiri
+st.sidebar.header(t["nav_header"])
+menu_choice = st.sidebar.radio(
+    "Pilihan Halaman / Page Selection:",
+    options=[t["menu_home"], t["menu_rain"], t["menu_temp"], t["menu_qc"]],
+    label_visibility="collapsed"
+)
 
-with col_title:
-    st.title(t["title"])
-    st.caption(f"🏛️ **{t['subtitle']}**")
-
-st.markdown(t["desc"])
-st.divider()
+st.sidebar.divider()
 
 # Sidebar: Pilihan Piawaian WMO bagi Data Hilang
 qc_rule = st.sidebar.radio(
@@ -237,7 +240,57 @@ uploaded_files = st.sidebar.file_uploader(
 )
 
 # ---------------------------------------------------------
-# 4. FUNGSI PEMPROSESAN DATA AAWS
+# 4. CUSTOM HEADER DENGAN BACKGROUND CORAK METMALAYSIA
+# ---------------------------------------------------------
+st.markdown("""
+<style>
+    .header-card {
+        background: linear-gradient(135deg, #102a45 0%, #1e4b7a 100%);
+        border-radius: 12px;
+        padding: 24px 30px;
+        color: white;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    .header-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0;
+        color: #ffffff;
+    }
+    .header-subtitle {
+        font-size: 15px;
+        color: #d0e1f9;
+        margin-top: 4px;
+        margin-bottom: 10px;
+    }
+    .header-desc {
+        font-size: 14px;
+        color: #f0f4f8;
+        margin: 0;
+        line-height: 1.4;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+head_col1, head_col2 = st.columns([1.3, 6])
+with head_col1:
+    try:
+        st.image("logo_met.png", width=175)
+    except:
+        st.write("🌤️")
+
+with head_col2:
+    st.markdown(f"""
+    <div class="header-card">
+        <div class="header-title">{t['title']}</div>
+        <div class="header-subtitle">🏛️ {t['subtitle']}</div>
+        <div class="header-desc">{t['desc']}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# 5. FUNGSI PEMPROSESAN DATA AAWS
 # ---------------------------------------------------------
 def process_multiple_aaws_files(files_list):
     all_stations_data = {}
@@ -290,7 +343,7 @@ def process_multiple_aaws_files(files_list):
     return all_stations_data
 
 # ---------------------------------------------------------
-# 5. FUNGSI SEMAKAN DATA LENGKAP MENGIKUT WMO
+# 6. FUNGSI SEMAKAN DATA LENGKAP MENGIKUT WMO
 # ---------------------------------------------------------
 def evaluate_month_qc(series, rule):
     missing_count = series.isna().sum()
@@ -311,7 +364,7 @@ def evaluate_month_qc(series, rule):
     return is_valid, missing_count, max_consecutive
 
 # ---------------------------------------------------------
-# 6. FUNGSI JANA AUDIT QC DWIBALAS
+# 7. FUNGSI JANA AUDIT QC DWIBALAS
 # ---------------------------------------------------------
 def generate_qc_audit_table(df_station, rule, t_dict):
     qc_records = []
@@ -347,7 +400,7 @@ def generate_qc_audit_table(df_station, rule, t_dict):
     return pd.DataFrame(qc_records)
 
 # ---------------------------------------------------------
-# 7. FUNGSI PENJANAAN BORANG EXCEL
+# 8. FUNGSI PENJANAAN BORANG EXCEL
 # ---------------------------------------------------------
 def generate_excel_for_station(station_name, df_station, rule):
     output = io.BytesIO()
@@ -414,198 +467,211 @@ def generate_excel_for_station(station_name, df_station, rule):
     return output
 
 # ---------------------------------------------------------
-# 8. STRUKTUR TAB UTAMA (HOME / RAINFALL / TEMP / QC)
+# 9. PEMPROSESAN DATA GLOBAL
 # ---------------------------------------------------------
-tab_home, tab_rain, tab_temp, tab_qc = st.tabs([
-    t["tab_home"], 
-    t["tab_rain"], 
-    t["tab_temp"], 
-    t["tab_qc"]
-])
+stations_data = {}
+if uploaded_files:
+    stations_data = process_multiple_aaws_files(uploaded_files)
 
-# === TAB 1: UTAMA / HOME ===
-with tab_home:
+# ---------------------------------------------------------
+# 10. KAWALAN PAPARAN MENGIKUT PILIHAN MENU SIDEBAR
+# ---------------------------------------------------------
+
+# === HALAMAN 1: UTAMA & PANDUAN ===
+if menu_choice == t["menu_home"]:
     st.subheader(t["home_title"])
     st.markdown(t["home_body"])
-    st.info(t["home_info"])
+    
+    st.info(t["home_wmo_box"])
+    
+    # Butang Muat Turun PDF WMO
+    try:
+        with open("WMO Guidelines on the Calculation of Climate Normals_en.pdf", "rb") as f:
+            pdf_bytes = f.read()
+        st.download_button(
+            label=t["btn_download_wmo"],
+            data=pdf_bytes,
+            file_name="WMO_Guidelines_Calculation_Climate_Normals_No1203.pdf",
+            mime="application/pdf"
+        )
+    except:
+        st.caption("ℹ️ Letakkan fail `WMO Guidelines on the Calculation of Climate Normals_en.pdf` di folder projek untuk membolehkan muat turun PDF.")
+        
+    if not uploaded_files:
+        st.divider()
+        st.info(t["home_info"])
 
-# === TAB 2: RAINFALL (HUJAN) ===
-with tab_rain:
-    if uploaded_files:
+# === HALAMAN 2: HUJAN (RAINFALL) ===
+elif menu_choice == t["menu_rain"]:
+    if uploaded_files and stations_data:
         st.success(t["upload_success"].format(count=len(uploaded_files)))
         
-        with st.spinner("Processing station data..."):
-            stations_data = process_multiple_aaws_files(uploaded_files)
+        # Pilihan Muat Turun ZIP Kelompok
+        col_zip1, col_zip2 = st.columns([3, 1])
+        with col_zip1:
+            st.subheader(t["stations_ready"].format(count=len(stations_data)))
+        with col_zip2:
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+                for st_name, st_df in stations_data.items():
+                    excel_bytes = generate_excel_for_station(st_name, st_df, qc_rule)
+                    clean_st_name = "".join([c for c in st_name if c.isalnum() or c in (' ', '_', '-')]).strip()
+                    zip_file.writestr(f"Climatology_{clean_st_name.replace(' ', '_')}.xlsx", excel_bytes.getvalue())
+            zip_buffer.seek(0)
             
-        if stations_data:
-            # Pilihan Muat Turun ZIP Kelompok
-            col_zip1, col_zip2 = st.columns([3, 1])
-            with col_zip1:
-                st.subheader(t["stations_ready"].format(count=len(stations_data)))
-            with col_zip2:
-                zip_buffer = io.BytesIO()
-                with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-                    for st_name, st_df in stations_data.items():
-                        excel_bytes = generate_excel_for_station(st_name, st_df, qc_rule)
-                        clean_st_name = "".join([c for c in st_name if c.isalnum() or c in (' ', '_', '-')]).strip()
-                        zip_file.writestr(f"Climatology_{clean_st_name.replace(' ', '_')}.xlsx", excel_bytes.getvalue())
-                zip_buffer.seek(0)
-                
-                st.download_button(
-                    label=t["download_zip"],
-                    data=zip_buffer,
-                    file_name=t["zip_filename"],
-                    mime="application/zip",
-                    type="primary"
+            st.download_button(
+                label=t["download_zip"],
+                data=zip_buffer,
+                file_name=t["zip_filename"],
+                mime="application/zip",
+                type="primary"
+            )
+            
+        st.divider()
+        
+        # Pemilihan Stesen Individu
+        selected_stesen = st.selectbox(t["select_station"], options=list(stations_data.keys()))
+        df_stesen = stations_data[selected_stesen]
+        
+        min_yr = df_stesen['Year'].min()
+        max_yr = df_stesen['Year'].max()
+        
+        # Pengiraan Ringkasan Integriti & QC
+        qc_df_station = generate_qc_audit_table(df_stesen, qc_rule, t)
+        total_months = len(qc_df_station)
+        incomplete_months_count = (qc_df_station[t["qc_col_status"]] == t["qc_status_incomp"]).sum()
+        total_missing_days = df_stesen['Rainfall_Numeric'].isna().sum()
+        completeness_pct = ((len(df_stesen) - total_missing_days) / len(df_stesen)) * 100
+        
+        # 📊 KAD METRIK RINGKASAN INTEGRITI DATA
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric(t["station_name"], selected_stesen)
+        m2.metric(t["record_period"], f"{min_yr} - {max_yr}")
+        m3.metric(t["completeness_rate"], f"{completeness_pct:.1f}%")
+        m4.metric(t["invalid_months"], f"{incomplete_months_count} / {total_months}", delta=f"-{incomplete_months_count}" if incomplete_months_count > 0 else None, delta_color="inverse")
+        
+        # Kotak Amaran Pintar
+        if incomplete_months_count > 0:
+            st.warning(t["alert_incomplete"].format(count=incomplete_months_count, rule=qc_rule))
+        
+        # Sub-Tab: Borang vs Graf
+        sub_form, sub_plots = st.tabs([t["subtab_form"], t["subtab_charts"]])
+        
+        with sub_form:
+            excel_file = generate_excel_for_station(selected_stesen, df_stesen, qc_rule)
+            clean_st_name = "".join([c for c in selected_stesen if c.isalnum() or c in (' ', '_', '-')]).strip()
+            
+            st.download_button(
+                label=t["download_excel"].format(station=selected_stesen),
+                data=excel_file,
+                file_name=f"Borang_Klimatologi_{clean_st_name.replace(' ', '_')}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+            
+            st.write(t["preview_title"])
+            st.dataframe(df_stesen.head(20), use_container_width=True)
+            
+        with sub_plots:
+            ctrl_col1, ctrl_col2 = st.columns(2)
+            
+            chart_options_map = {
+                t["opt_heatmap"]: "Heatmap",
+                t["opt_trend"]: "Trend",
+                t["opt_normals"]: "Normals"
+            }
+            
+            with ctrl_col1:
+                chart_choice_label = st.selectbox(
+                    t["plot_type"],
+                    options=list(chart_options_map.keys())
                 )
+                chart_choice = chart_options_map[chart_choice_label]
                 
-            st.divider()
-            
-            # Pemilihan Stesen Individu
-            selected_stesen = st.selectbox(t["select_station"], options=list(stations_data.keys()))
-            df_stesen = stations_data[selected_stesen]
-            
-            min_yr = df_stesen['Year'].min()
-            max_yr = df_stesen['Year'].max()
-            
-            # Pengiraan Ringkasan Integriti & QC
-            qc_df_station = generate_qc_audit_table(df_stesen, qc_rule, t)
-            total_months = len(qc_df_station)
-            incomplete_months_count = (qc_df_station[t["qc_col_status"]] == t["qc_status_incomp"]).sum()
-            total_missing_days = df_stesen['Rainfall_Numeric'].isna().sum()
-            completeness_pct = ((len(df_stesen) - total_missing_days) / len(df_stesen)) * 100
-            
-            # 📊 KAD METRIK RINGKASAN INTEGRITI DATA
-            m1, m2, m3, m4 = st.columns(4)
-            m1.metric(t["station_name"], selected_stesen)
-            m2.metric(t["record_period"], f"{min_yr} - {max_yr}")
-            m3.metric(t["completeness_rate"], f"{completeness_pct:.1f}%")
-            m4.metric(t["invalid_months"], f"{incomplete_months_count} / {total_months}", delta=f"-{incomplete_months_count}" if incomplete_months_count > 0 else None, delta_color="inverse")
-            
-            # Kotak Amaran Pintar Jika Terdapat Bulan Incomplete
-            if incomplete_months_count > 0:
-                st.warning(t["alert_incomplete"].format(count=incomplete_months_count, rule=qc_rule))
-            
-            # Sub-Tab: Borang Excel vs Visualisasi Interaktif
-            sub_form, sub_plots = st.tabs([t["subtab_form"], t["subtab_charts"]])
-            
-            with sub_form:
-                excel_file = generate_excel_for_station(selected_stesen, df_stesen, qc_rule)
-                clean_st_name = "".join([c for c in selected_stesen if c.isalnum() or c in (' ', '_', '-')]).strip()
-                
-                st.download_button(
-                    label=t["download_excel"].format(station=selected_stesen),
-                    data=excel_file,
-                    file_name=f"Borang_Klimatologi_{clean_st_name.replace(' ', '_')}.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            with ctrl_col2:
+                color_choice = st.selectbox(
+                    t["color_theme"],
+                    options=["Blues", "Viridis", "YlGnBu", "Spectral", "Plasma", "Turbo", "Teal"]
                 )
+            
+            # Heatmap
+            if chart_choice == "Heatmap":
+                years_list = sorted(df_stesen['Year'].unique())
+                chosen_year = st.selectbox(t["select_year_heat"], options=years_list, index=len(years_list)-1)
                 
-                st.write(t["preview_title"])
-                st.dataframe(df_stesen.head(20), use_container_width=True)
+                df_heat = df_stesen[df_stesen['Year'] == chosen_year]
+                heat_pivot = df_heat.pivot(index='Day', columns='Month', values='Rainfall_Numeric')
+                heat_pivot = heat_pivot.reindex(index=range(1, 32), columns=range(1, 13))
                 
-            with sub_plots:
-                # Kawalan Pilihan Graf & Tema Warna
-                ctrl_col1, ctrl_col2 = st.columns(2)
+                month_labels = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
                 
-                chart_options_map = {
-                    t["opt_heatmap"]: "Heatmap",
-                    t["opt_trend"]: "Trend",
-                    t["opt_normals"]: "Normals"
-                }
+                fig_heat = px.imshow(
+                    heat_pivot,
+                    labels=dict(x=t["axis_month"], y=t["axis_day"], color=t["axis_rain"]),
+                    x=month_labels,
+                    y=[str(d) for d in range(1, 32)],
+                    color_continuous_scale=color_choice,
+                    aspect="auto",
+                    title=t["heat_title"].format(station=selected_stesen, year=chosen_year)
+                )
+                fig_heat.update_layout(height=650)
+                st.plotly_chart(fig_heat, use_container_width=True)
                 
-                with ctrl_col1:
-                    chart_choice_label = st.selectbox(
-                        t["plot_type"],
-                        options=list(chart_options_map.keys())
-                    )
-                    chart_choice = chart_options_map[chart_choice_label]
-                    
-                with ctrl_col2:
-                    color_choice = st.selectbox(
-                        t["color_theme"],
-                        options=["Blues", "Viridis", "YlGnBu", "Spectral", "Plasma", "Turbo", "Teal"]
-                    )
+            # Trend
+            elif chart_choice == "Trend":
+                annual_df = df_stesen.groupby('Year')['Rainfall_Numeric'].sum().reset_index()
+                mean_val = annual_df['Rainfall_Numeric'].mean()
                 
-                # --- GRAF 1: HEATMAP KEAMATAN HUJAN ---
-                if chart_choice == "Heatmap":
-                    years_list = sorted(df_stesen['Year'].unique())
-                    chosen_year = st.selectbox(t["select_year_heat"], options=years_list, index=len(years_list)-1)
-                    
-                    df_heat = df_stesen[df_stesen['Year'] == chosen_year]
-                    heat_pivot = df_heat.pivot(index='Day', columns='Month', values='Rainfall_Numeric')
-                    heat_pivot = heat_pivot.reindex(index=range(1, 32), columns=range(1, 13))
-                    
-                    month_labels = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-                    
-                    fig_heat = px.imshow(
-                        heat_pivot,
-                        labels=dict(x=t["axis_month"], y=t["axis_day"], color=t["axis_rain"]),
-                        x=month_labels,
-                        y=[str(d) for d in range(1, 32)],
-                        color_continuous_scale=color_choice,
-                        aspect="auto",
-                        title=t["heat_title"].format(station=selected_stesen, year=chosen_year)
-                    )
-                    fig_heat.update_layout(height=650)
-                    st.plotly_chart(fig_heat, use_container_width=True)
-                    
-                # --- GRAF 2: TREND TAHUNAN ---
-                elif chart_choice == "Trend":
-                    annual_df = df_stesen.groupby('Year')['Rainfall_Numeric'].sum().reset_index()
-                    mean_val = annual_df['Rainfall_Numeric'].mean()
-                    
-                    fig_trend = px.bar(
-                        annual_df, 
-                        x='Year', 
-                        y='Rainfall_Numeric',
-                        color='Rainfall_Numeric',
-                        color_continuous_scale=color_choice,
-                        labels={'Rainfall_Numeric': t["axis_rain"], 'Year': t["axis_year"]},
-                        title=t["trend_title"].format(station=selected_stesen, min_yr=min_yr, max_yr=max_yr)
-                    )
-                    fig_trend.add_hline(
-                        y=mean_val, 
-                        line_dash="dash", 
-                        line_color="red", 
-                        annotation_text=f"{t['trend_avg_label']}: {mean_val:.1f} mm"
-                    )
-                    st.plotly_chart(fig_trend, use_container_width=True)
-                    
-                # --- GRAF 3: PURATA BULANAN KLIMATOLOGI ---
-                elif chart_choice == "Normals":
-                    month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-                    month_df = df_stesen.groupby('Month')['Rainfall_Numeric'].mean().reset_index()
-                    month_df['Month_Name'] = month_df['Month'].apply(lambda x: month_names[x-1])
-                    
-                    fig_norm = px.line(
-                        month_df,
-                        x='Month_Name',
-                        y='Rainfall_Numeric',
-                        markers=True,
-                        title=t["norm_title"].format(station=selected_stesen),
-                        labels={'Rainfall_Numeric': t["axis_avg_rain"], 'Month_Name': t["axis_month"]}
-                    )
-                    fig_norm.update_traces(line_color="#1f77b4", marker=dict(size=9))
-                    st.plotly_chart(fig_norm, use_container_width=True)
+                fig_trend = px.bar(
+                    annual_df, 
+                    x='Year', 
+                    y='Rainfall_Numeric',
+                    color='Rainfall_Numeric',
+                    color_continuous_scale=color_choice,
+                    labels={'Rainfall_Numeric': t["axis_rain"], 'Year': t["axis_year"]},
+                    title=t["trend_title"].format(station=selected_stesen, min_yr=min_yr, max_yr=max_yr)
+                )
+                fig_trend.add_hline(
+                    y=mean_val, 
+                    line_dash="dash", 
+                    line_color="red", 
+                    annotation_text=f"{t['trend_avg_label']}: {mean_val:.1f} mm"
+                )
+                st.plotly_chart(fig_trend, use_container_width=True)
+                
+            # Normals
+            elif chart_choice == "Normals":
+                month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+                month_df = df_stesen.groupby('Month')['Rainfall_Numeric'].mean().reset_index()
+                month_df['Month_Name'] = month_df['Month'].apply(lambda x: month_names[x-1])
+                
+                fig_norm = px.line(
+                    month_df,
+                    x='Month_Name',
+                    y='Rainfall_Numeric',
+                    markers=True,
+                    title=t["norm_title"].format(station=selected_stesen),
+                    labels={'Rainfall_Numeric': t["axis_avg_rain"], 'Month_Name': t["axis_month"]}
+                )
+                fig_norm.update_traces(line_color="#1f77b4", marker=dict(size=9))
+                st.plotly_chart(fig_norm, use_container_width=True)
     else:
         st.info(t["info_upload"])
 
-# === TAB 3: TEMPERATURE (SUHU) ===
-with tab_temp:
+# === HALAMAN 3: SUHU (TEMPERATURE) ===
+elif menu_choice == t["menu_temp"]:
     st.subheader(t["temp_title"])
     st.info(t["temp_desc"])
 
-# === TAB 4: QC & WMO COMPLETENESS ===
-with tab_qc:
+# === HALAMAN 4: QC & WMO COMPLETENESS ===
+elif menu_choice == t["menu_qc"]:
     st.subheader(t["qc_title"])
     st.markdown(t["qc_desc"])
     
-    if uploaded_files and 'stations_data' in locals() and stations_data:
+    if uploaded_files and stations_data:
         st.divider()
         qc_station_choice = st.selectbox(t["qc_select_station"], options=list(stations_data.keys()), key="qc_select")
         qc_table = generate_qc_audit_table(stations_data[qc_station_choice], qc_rule, t)
         
-        # Penapis Paparan
         filter_col1, filter_col2 = st.columns([2, 1])
         with filter_col1:
             show_failed_only = st.checkbox(t["qc_filter_failed"], value=False)
