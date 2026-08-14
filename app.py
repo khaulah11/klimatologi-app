@@ -72,11 +72,11 @@ t = TEXTS[lang_key]
 col_logo, col_title = st.columns([1, 6])
 
 with col_logo:
-    # URL Logo Rasmi MetMalaysia
-    st.image(
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Jabatan_Meteorologi_Malaysia_logo.png/600px-Jabatan_Meteorologi_Malaysia_logo.png", 
-        width=110
-    )
+    # Panggil terus fail logo tempatan yang Moza simpan
+    try:
+        st.image("logo_met.png", width=110)
+    except:
+        st.write("🌤️") # Backup icon jika gambar tiada
 
 with col_title:
     st.title(t["title"])
