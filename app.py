@@ -10,10 +10,10 @@ import zipfile
 TEXTS = {
     "BM": {
         "page_title": "Sistem Automasi Klimatologi MetMalaysia",
-        "title": "🌧️ Sistem Automasi Analisis Klimatologi MetMalaysia",
+        "title": "Sistem Automasi Analisis Klimatologi",
+        "subtitle": "Jabatan Meteorologi Malaysia (MetMalaysia) | Pejabat Meteorologi Sabah",
         "desc": "Aplikasi ini menukar *raw data* siri masa **AAWS (Pemprosesan Berkelompok / Batch)** kepada **Format Borang Rekod Hujan Harian Piawai** secara automatik.",
         "sidebar_header": "📁 Muat Naik Fail Data",
-        "lang_label": "🌐 Pilih Bahasa",
         "upload_label": "Muat naik satu atau BERBILANG Fail Raw Data AAWS (.xls / .xlsx)",
         "upload_success": "✅ Berjaya memuat naik {count} fail AAWS!",
         "processing": "Sedang menggabungkan dan memproses semua siri masa stesen...",
@@ -30,10 +30,10 @@ TEXTS = {
     },
     "EN": {
         "page_title": "MetMalaysia Climatology Automation System",
-        "title": "🌧️ MetMalaysia Climatology Analysis Automation System",
+        "title": "Climatology Analysis Automation System",
+        "subtitle": "Malaysian Meteorological Department (MetMalaysia) | Sabah Meteorological Office",
         "desc": "This application automatically processes time-series **AAWS raw data (Batch Processing)** and converts it into the **Standard Daily Rainfall Record Sheet Format**.",
         "sidebar_header": "📁 Upload Data Files",
-        "lang_label": "🌐 Select Language",
         "upload_label": "Upload one or MULTIPLE Raw AAWS Data Files (.xls / .xlsx)",
         "upload_success": "✅ Successfully uploaded {count} AAWS file(s)!",
         "processing": "Merging and processing time-series data for all stations...",
@@ -56,19 +56,34 @@ TEXTS = {
 st.set_page_config(
     page_title="MetMalaysia Climatology System",
     layout="wide",
-    page_icon="🌧️"
+    page_icon="🌤️"
 )
 
 # Sidebar Language Selector
 st.sidebar.header("⚙️ Tetapan / Settings")
 selected_lang = st.sidebar.selectbox("🌐 Bahasa / Language", options=["Bahasa Melayu", "English"])
 
-# Tentukan kamus bahasa semasa
 lang_key = "BM" if selected_lang == "Bahasa Melayu" else "EN"
 t = TEXTS[lang_key]
 
-st.title(t["title"])
+# ---------------------------------------------------------
+# 3. HEADER ATAS: LOGO METMALAYSIA & TAJUK RASMI
+# ---------------------------------------------------------
+col_logo, col_title = st.columns([1, 6])
+
+with col_logo:
+    # URL Logo Rasmi MetMalaysia
+    st.image(
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Jabatan_Meteorologi_Malaysia_logo.png/600px-Jabatan_Meteorologi_Malaysia_logo.png", 
+        width=110
+    )
+
+with col_title:
+    st.title(t["title"])
+    st.caption(f"🏛️ **{t['subtitle']}**")
+
 st.markdown(t["desc"])
+st.divider()
 
 # Sidebar File Uploader
 st.sidebar.header(t["sidebar_header"])
@@ -79,7 +94,7 @@ uploaded_files = st.sidebar.file_uploader(
 )
 
 # ---------------------------------------------------------
-# 3. FUNGSI UTAMA: PEMPROSESAN BATCH AAWS
+# 4. FUNGSI UTAMA: PEMPROSESAN BATCH AAWS
 # ---------------------------------------------------------
 def process_multiple_aaws_files(files_list):
     all_stations_data = {}
@@ -132,7 +147,7 @@ def process_multiple_aaws_files(files_list):
     return all_stations_data
 
 # ---------------------------------------------------------
-# 4. FUNGSI PENJANAAN BORANG EXCEL
+# 5. FUNGSI PENJANAAN BORANG EXCEL
 # ---------------------------------------------------------
 def generate_excel_for_station(station_name, df_station):
     output = io.BytesIO()
@@ -180,7 +195,7 @@ def generate_excel_for_station(station_name, df_station):
     return output
 
 # ---------------------------------------------------------
-# 5. ALUR KERJA APLIKASI
+# 6. ALUR KERJA APLIKASI
 # ---------------------------------------------------------
 if uploaded_files:
     st.success(t["upload_success"].format(count=len(uploaded_files)))
