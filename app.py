@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import io
+import zipfile
 
 # ---------------------------------------------------------
 # 1. TETAPAN HALAMAN STREAMLIT
@@ -14,60 +15,75 @@ st.set_page_config(
 
 st.title("🌧️ Sistem Automasi Analisis Klimatologi MetMalaysia")
 st.markdown("""
-Aplikasi ini menukar *raw data* siri masa **AAWS** kepada **Format Borang Rekod Hujan Harian Piawai** secara automatik.
+Aplikasi ini menukar *raw data* siri masa **AAWS (Pemprosesan Berkelompok / Batch)** kepada **Format Borang Rekod Hujan Harian Piawai** secara automatik.
 """)
 
 # ---------------------------------------------------------
-# 2. MENU DITINGKAP TEPI (SIDEBAR) - MUAT NAIK FAIL
+# 2. MENU DITINGKAP TEPI (SIDEBAR) - MUAT NAIK BANYAK FAIL
 # ---------------------------------------------------------
 st.sidebar.header("📁 Muat Naik Fail Data")
-uploaded_aaws = st.sidebar.file_uploader(
-    "Muat naik mana-mana Fail Raw Data AAWS (.xls / .xlsx)", 
-    type=["xls", "xlsx"]
+uploaded_files = st.sidebar.file_uploader(
+    "Muat naik satu atau BERBILANG Fail Raw Data AAWS (.xls / .xlsx)", 
+    type=["xls", "xlsx"],
+    accept_multiple_files=True  # Benarkan muat naik berkelompok
 )
 
 # ---------------------------------------------------------
-# 3. FUNGSI UTAMA: PEMPROSESAN DATA AAWS
+# 3. FUNGSI UTAMA: PEMPROSESAN BATCH AAWS
 # ---------------------------------------------------------
-def process_aaws_file(file_aaws):
-    xls = pd.ExcelFile(file_aaws)
-    station_dict = {}
+def process_multiple_aaws_files(files_list):
+    """
+    Membaca berbilang fail AAWS dan menggabungkan data mengikut Stesen.
+    """
+    all_stations_data = {}
     
-    for sheet in xls.sheet_names:
-        if sheet.lower() == 'datalist':
-            continue
+    for file in files_list:
+        xls = pd.ExcelFile(file)
+        
+        for sheet in xls.sheet_names:
+            if sheet.lower() == 'datalist':
+                continue
+                
+            df = pd.read_excel(xls, sheet_name=sheet)
             
-        df = pd.read_excel(xls, sheet_name=sheet)
-        
-        raw_station_text = str(df.iloc[2, 0])
-        if ':' in raw_station_text:
-            station_name = raw_station_text.split(':', 1)[1].strip()
-        else:
-            station_name = raw_station_text.replace("Station", "").strip()
+            # Ekstrak Nama Stesen
+            raw_station_text = str(df.iloc[2, 0])
+            if ':' in raw_station_text:
+                station_name = raw_station_text.split(':', 1)[1].strip()
+            else:
+                station_name = raw_station_text.replace("Station", "").strip()
+                
+            if not station_name or station_name == "nan":
+                station_name = f"Stesen_{sheet}"
+                
+            data = df.iloc[11:].copy().iloc[:, :4]
+            data.columns = ['Year', 'Month', 'Day', 'Rainfall']
             
-        if not station_name or station_name == "nan":
-            station_name = f"Stesen_{sheet}"
+            data['Year'] = pd.to_numeric(data['Year'], errors='coerce')
+            data['Month'] = pd.to_numeric(data['Month'], errors='coerce')
+            data['Day'] = pd.to_numeric(data['Day'], errors='coerce')
             
-        data = df.iloc[11:].copy().iloc[:, :4]
-        data.columns = ['Year', 'Month', 'Day', 'Rainfall']
-        
-        data['Year'] = pd.to_numeric(data['Year'], errors='coerce')
-        data['Month'] = pd.to_numeric(data['Month'], errors='coerce')
-        data['Day'] = pd.to_numeric(data['Day'], errors='coerce')
-        
-        data['Rainfall_Numeric'] = pd.to_numeric(data['Rainfall'], errors='coerce')
-        
-        data = data.dropna(subset=['Year', 'Month', 'Day'])
-        data['Year'] = data['Year'].astype(int)
-        data['Month'] = data['Month'].astype(int)
-        data['Day'] = data['Day'].astype(int)
-        
-        station_dict[station_name] = data
-        
-    return station_dict
+            data['Rainfall_Numeric'] = pd.to_numeric(data['Rainfall'], errors='coerce')
+            data['Rainfall_Display'] = data['Rainfall']
+            
+            data = data.dropna(subset=['Year', 'Month', 'Day'])
+            data['Year'] = data['Year'].astype(int)
+            data['Month'] = data['Month'].astype(int)
+            data['Day'] = data['Day'].astype(int)
+            
+            # Jika stesen wujud dalam fail berbeza, gabungkannya
+            if station_name in all_stations_data:
+                combined_df = pd.concat([all_stations_data[station_name], data], ignore_index=True)
+                # Buang rekod bertindih jika ada
+                combined_df = combined_df.drop_duplicates(subset=['Year', 'Month', 'Day'])
+                all_stations_data[station_name] = combined_df
+            else:
+                all_stations_data[station_name] = data
+                
+    return all_stations_data
 
 # ---------------------------------------------------------
-# 4. FUNGSI PENJANAAN BORANG EXCEL (DENGAN STATISTIK)
+# 4. FUNGSI PENJANAAN BORANG EXCEL
 # ---------------------------------------------------------
 def generate_excel_for_station(station_name, df_station):
     output = io.BytesIO()
@@ -80,19 +96,18 @@ def generate_excel_for_station(station_name, df_station):
             df_yr = df_station[df_station['Year'] == yr]
             
             pivot_num = df_yr.pivot(index='Day', columns='Month', values='Rainfall_Numeric')
-            pivot_raw = df_yr.pivot(index='Day', columns='Month', values='Rainfall')
+            pivot_display = df_yr.pivot(index='Day', columns='Month', values='Rainfall_Display')
             
             pivot_num = pivot_num.reindex(index=range(1, 32), columns=range(1, 13))
-            pivot_raw = pivot_raw.reindex(index=range(1, 32), columns=range(1, 13))
+            pivot_display = pivot_display.reindex(index=range(1, 32), columns=range(1, 13))
             
-            # Statistik Klimatologi
+            # Pengiraan Statistik
             total_rain = pivot_num.sum(axis=0, skipna=True)
             rain_days = (pivot_num > 0.1).sum(axis=0)
             highest_fall = pivot_num.max(axis=0, skipna=True)
             highest_date = pivot_num.idxmax(axis=0, skipna=True)
             
-            report_df = pivot_raw.copy()
-            report_df = report_df.fillna('M')
+            report_df = pivot_display.copy()
             
             report_df.loc['TOTAL'] = total_rain.round(1)
             report_df.loc['No. Of Days (>0.1mm)'] = rain_days
@@ -108,17 +123,39 @@ def generate_excel_for_station(station_name, df_station):
     return output
 
 # ---------------------------------------------------------
-# 5. ALUR KERJA APLIKASI
+# 5. ALUR KERJA APLIKASI BATCH
 # ---------------------------------------------------------
-if uploaded_aaws is not None:
-    st.success("✅ Fail AAWS berjaya dimuat naik!")
+if uploaded_files:
+    st.success(f"✅ Berjaya memuat naik {len(uploaded_files)} fail AAWS!")
     
-    with st.spinner("Sedang memproses data siri masa..."):
-        stations_data = process_aaws_file(uploaded_aaws)
+    with st.spinner("Sedang menggabungkan dan memproses semua siri masa stesen..."):
+        stations_data = process_multiple_aaws_files(uploaded_files)
         
-    st.subheader("📌 Senarai Stesen Terkesan")
+    st.subheader(f"📌 {len(stations_data)} Stesen Dikesan Dari Semua Fail")
+    
+    # Pilihan 1: Muat Turun Semua Stesen Sekaligus (ZIP File)
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        for st_name, st_df in stations_data.items():
+            excel_bytes = generate_excel_for_station(st_name, st_df)
+            clean_filename = f"Borang_Klimatologi_{st_name.replace(' ', '_')}.xlsx"
+            zip_file.writestr(clean_filename, excel_bytes.getvalue())
+            
+    zip_buffer.seek(0)
+    
+    st.download_button(
+        label="📦 MUAT TURUN SEMUA STESEN (FAIL .ZIP)",
+        data=zip_buffer,
+        file_name="Laporan_Klimatologi_Semua_Stesen.zip",
+        mime="application/zip",
+        type="primary"
+    )
+    
+    st.divider()
+    
+    # Pilihan 2: Pilih Stesen Tertentu Untuk Pratonton & Muat Turun Individu
     selected_stesen = st.selectbox(
-        "Pilih Stesen untuk Pratonton / Muat Turun:", 
+        "Atau pilih Stesen secara individu untuk Pratonton:", 
         options=list(stations_data.keys())
     )
     
@@ -140,9 +177,8 @@ if uploaded_aaws is not None:
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
         
-        st.divider()
         st.write("### 🔍 Pratonton Data Raw (20 Rekod Pertama)")
         st.dataframe(df_stesen.head(20), use_container_width=True)
 
 else:
-    st.info("👈 Sila muat naik fail raw AAWS di bahagian menu tepi untuk bermula.")
+    st.info("👈 Sila muat naik satu atau lebih fail raw AAWS di menu tepi untuk bermula.")
