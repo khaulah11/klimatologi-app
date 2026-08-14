@@ -74,7 +74,7 @@ col_logo, col_title = st.columns([1.5, 6])
 with col_logo:
     # Panggil terus fail logo tempatan yang Moza simpan
     try:
-        st.image("logo_met.png", width=170)
+        st.image("logo_met.png", width=190)
     except:
         st.write("🌤️") # Backup icon jika gambar tiada
 
