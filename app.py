@@ -69,12 +69,12 @@ t = TEXTS[lang_key]
 # ---------------------------------------------------------
 # 3. HEADER ATAS: LOGO METMALAYSIA & TAJUK RASMI
 # ---------------------------------------------------------
-col_logo, col_title = st.columns([1, 6])
+col_logo, col_title = st.columns([1.5, 6])
 
 with col_logo:
     # Panggil terus fail logo tempatan yang Moza simpan
     try:
-        st.image("logo_met.png", width=110)
+        st.image("logo_met.png", width=170)
     except:
         st.write("🌤️") # Backup icon jika gambar tiada
 
