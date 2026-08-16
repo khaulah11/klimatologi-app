@@ -42,7 +42,7 @@ TEXTS = {
         "select_param": "Pilih Parameter Cerapan:",
         "param_rain": "🌧️ Hujan (Rainfall)",
         "param_temp": "🌡️ Suhu Udara (Temperature)",
-        "no_param_data": "⚠️ **Tiada data {param_name} dikesan dalam fail yang dimuat naik.** Parameter dikesan dalam fail: **{detected_params}**. Sila tukar pilihan toggle atau muat naik fail yang sepadan.",
+        "no_param_data": "⚠️ **Tiada data {param_name} dikesan dalam fail yang dimuat naik.** Parameter yang dikesan dalam fail semasa: **{detected_params}**. Sila tukar toggle atau muat naik fail data {param_name}.",
         "select_station": "Pilih Stesen:",
         "station_name": "Stesen",
         "record_period": "Tempoh Rekod",
@@ -105,7 +105,7 @@ TEXTS = {
         "select_param": "Select Climate Parameter:",
         "param_rain": "🌧️ Rainfall",
         "param_temp": "🌡️ Air Temperature",
-        "no_param_data": "⚠️ **No {param_name} data detected in the uploaded file(s).** Detected parameter in dataset: **{detected_params}**. Please switch toggle or upload matching data.",
+        "no_param_data": "⚠️ **No {param_name} data detected in the uploaded file(s).** Detected parameter in current dataset: **{detected_params}**. Please switch toggle or upload {param_name} data.",
         "select_station": "Select Station:",
         "station_name": "Station",
         "record_period": "Record Period",
@@ -154,7 +154,6 @@ with st.sidebar:
     lang_key = "BM" if selected_lang == "Bahasa Melayu" else "EN"
     t = TEXTS[lang_key]
     
-    # Seksyen Manual Penggunaan Terus di Sidebar
     with st.expander(t["manual_header"], expanded=False):
         st.markdown(t["manual_desc"])
         try:
@@ -202,14 +201,23 @@ with header_col2:
 st.divider()
 
 # ---------------------------------------------------------
-# 5. FUNGSI PEMPROSESAN DATA DENGAN SMART PARAMETER DETECTION
+# 5. FUNGSI PEMPROSESAN DATA DENGAN PENGECAMAN KETAT
 # ---------------------------------------------------------
 def detect_parameter_type(header_text):
     text_lower = header_text.lower()
-    if any(k in text_lower for k in ['temp', 'suhu', 'temperature', 'celsius', '°c', 'c']):
+    # Semak perkataan penuh sahaja (tiada huruf 'c' tunggal)
+    temp_keywords = ['temperature', 'suhu', 'temp', 'celsius', '°c', 'deg c', 'degc']
+    rain_keywords = ['rainfall', 'hujan', 'rain', 'presipitasi', 'rf', 'mm']
+    
+    is_temp = any(k in text_lower for k in temp_keywords)
+    is_rain = any(k in text_lower for k in rain_keywords)
+    
+    if is_temp and not is_rain:
         return "Temperature"
-    elif any(k in text_lower for k in ['rain', 'hujan', 'rainfall', 'presipitasi', 'mm']):
+    elif is_rain and not is_temp:
         return "Rainfall"
+    elif is_temp:
+        return "Temperature"
     return "Rainfall"
 
 def process_multiple_aaws_files(files_list):
@@ -226,7 +234,7 @@ def process_multiple_aaws_files(files_list):
                     continue
                 df = pd.read_excel(xls, sheet_name=sheet)
                 
-                # Imbas teks 11 baris pertama fail untuk pastikan parameter
+                # Imbas teks 11 baris pertama fail secara teliti
                 header_dump = " ".join([str(val) for val in df.iloc[:11, :].values.flatten()])
                 detected_param = detect_parameter_type(header_dump)
                 
@@ -366,14 +374,14 @@ if uploaded_files:
     all_data = process_multiple_aaws_files(uploaded_files)
 
 # ---------------------------------------------------------
-# 6. TAB NAVIGASI UTAMA (DUA TAB FOKUS)
+# 6. TAB NAVIGASI UTAMA
 # ---------------------------------------------------------
 tab_analysis, tab_qc = st.tabs([
     t["nav_analysis"], 
     t["nav_qc"]
 ])
 
-# === TAB 1: ANALISIS PARAMETER (RAINFALL / TEMPERATURE) ===
+# === TAB 1: ANALISIS PARAMETER ===
 with tab_analysis:
     if uploaded_files:
         chosen_param_label = st.radio(
@@ -386,7 +394,7 @@ with tab_analysis:
         
         stations_data = all_data.get(param_mode, {})
         
-        # Sekatan Dua Hala (Bidirectional Guardrail)
+        # Amaran Sekatan jika fail yang dimuat naik bukan parameter ini
         if not stations_data:
             detected = [k for k, v in all_data.items() if len(v) > 0]
             detected_str = ", ".join(detected) if detected else "Tiada"
