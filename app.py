@@ -22,51 +22,49 @@ TEXTS = {
         "title": "Sistem Automasi Analisis Klimatologi",
         "subtitle": "Jabatan Meteorologi Malaysia (MetMalaysia) | Pejabat Meteorologi Sabah",
         "nav_home": "Utama",
-        "nav_rain": "Hujan",
-        "nav_temp": "Suhu",
+        "nav_analysis": "Analisis Parameter",
         "nav_qc": "Semakan QC & WMO",
         "sidebar_header": "Data & Tetapan",
         "upload_label": "Muat naik fail siri masa AAWS (.xls / .xlsx)",
         "upload_success": "✅ {count} fail berjaya dimuat naik.",
         "qc_mode_label": "Piawaian Data Hilang (WMO):",
-        "home_title": "Panduan & Standard Pengiraan",
-        "home_desc": "Sistem automasi bagi penukaran data siri masa AAWS kepada format Borang Rekod Hujan Piawai serta penapisan integriti data mengikut panduan WMO-No. 1203.",
+        "home_title": "Panduan Penggunaan & Standard WMO-No. 1203",
+        "home_desc": "Sistem automasi bagi penukaran data siri masa AAWS kepada format Borang Rekod Piawai serta penapisan integriti data mengikut panduan WMO-No. 1203.",
         "home_points": """
         * **Format Piawai:** Penjanaan automatik matriks 31 hari $\\times$ 12 bulan (JAN–DEC) bagi setiap tahun stesen.
-        * **Tapisan Integriti WMO:** Pengesanan hari hilang (NA) mengikut piawaian saintifik sebelum jumlah/purata dikira.
-        * **Visualisasi:** Analisis matriks keamatan hujan harian (Heatmap) dan siri masa tahunan secara interaktif.
+        * **Sokongan Berbilang Parameter:** Suis pantas antara Hujan (*Rainfall - mm*) dan Suhu Udara (*Temperature - °C*).
+        * **Tapisan Integriti WMO:** Menapis data hilang (NA) mengikut ketetapan piawaian sebelum statistik dihitung.
+        * **Visualisasi:** Analisis matriks keamatan harian (Heatmap) dan siri masa secara interaktif.
         """,
         "btn_download_wmo": "📥 Muat Turun Dokumen WMO-No. 1203 (PDF)",
         "stations_ready": "{count} Stesen Dikesan",
         "download_zip": "📦 Muat Turun Semua (.ZIP)",
         "zip_filename": "Laporan_Klimatologi_Semua_Stesen.zip",
+        "select_param": "Pilih Parameter Iklim:",
+        "param_rain": "🌧️ Hujan (Rainfall)",
+        "param_temp": "🌡️ Suhu Udara (Temperature)",
         "select_station": "Pilih Stesen:",
         "station_name": "Stesen",
         "record_period": "Tempoh Rekod",
-        "total_records": "Jumlah Baris",
         "completeness_rate": "Kesempurnaan Data",
         "invalid_months": "Bulan Tidak Lengkap",
-        "alert_incomplete": "⚠️ **Perhatian:** Terdapat **{count} bulan** tidak memenuhi piawaian data lengkap ({rule}). Statistik bagi bulan berkenaan ditandakan sebagai `N.A (Incomplete)`.",
+        "alert_incomplete": "⚠️ **Perhatian:** Terdapat **{count} bulan** tidak memenuhi piawaian data lengkap ({rule}). Nilai bagi bulan berkenaan ditandakan sebagai `N.A (Incomplete)`.",
         "subtab_form": "Borang Rekod & Muat Turun",
         "subtab_charts": "Visualisasi Data",
         "download_excel": "📥 Muat Turun Excel ({station})",
         "plot_type": "Pilih Jenis Graf:",
         "color_theme": "Skim Warna:",
-        "opt_heatmap": "Matriks Harian Hujan (Heatmap)",
-        "opt_trend": "Trend Hujan Tahunan (Time-Series)",
-        "opt_normals": "Purata Profil Bulanan (Normals)",
+        "opt_heatmap": "Matriks Harian (Heatmap)",
+        "opt_trend": "Trend Siri Masa Tahunan",
+        "opt_normals": "Profil Purata Bulanan (Normals)",
         "select_year_heat": "Pilih Tahun:",
-        "heat_title": "Matriks Keamatan Hujan Harian — {station} ({year})",
+        "heat_title": "Matriks Harian {param} — {station} ({year})",
         "axis_month": "Bulan",
         "axis_day": "Hari",
-        "axis_rain": "Hujan (mm)",
         "axis_year": "Tahun",
-        "axis_avg_rain": "Purata Hujan (mm)",
-        "trend_title": "Trend Hujan Tahunan — {station} ({min_yr} - {max_yr})",
+        "trend_title": "Trend Tahunan {param} — {station} ({min_yr} - {max_yr})",
         "trend_avg_label": "Purata",
-        "norm_title": "Profil Purata Hujan Bulanan — {station}",
-        "temp_title": "Modul Analisis Suhu Udara",
-        "temp_desc": "Modul suhu akan diaktifkan apabila format data Maximum/Minimum dibekalkan.",
+        "norm_title": "Profil Purata Bulanan {param} — {station}",
         "qc_title": "Log Audit Integriti Data (WMO-No. 1203)",
         "qc_filter_failed": "Tapis: Paparkan bulan tidak lengkap / ada NA sahaja",
         "download_qc_csv": "📥 Muat Turun Log Audit (.CSV)",
@@ -87,51 +85,49 @@ TEXTS = {
         "title": "Climatology Analysis Automation System",
         "subtitle": "Malaysian Meteorological Department (MetMalaysia) | Sabah Meteorological Office",
         "nav_home": "Home",
-        "nav_rain": "Rainfall",
-        "nav_temp": "Temperature",
+        "nav_analysis": "Parameter Analysis",
         "nav_qc": "QC & WMO Audit",
         "sidebar_header": "Data & Controls",
         "upload_label": "Upload AAWS time-series files (.xls / .xlsx)",
         "upload_success": "✅ {count} file(s) successfully uploaded.",
         "qc_mode_label": "Missing Data Standard (WMO):",
-        "home_title": "User Guide & Calculation Standards",
+        "home_title": "User Guide & WMO-No. 1203 Standards",
         "home_desc": "Automated system for converting AAWS time-series data into standard climatological record sheets and screening data integrity per WMO-No. 1203 guidelines.",
         "home_points": """
         * **Standard Grid Format:** Automated 31-day $\\times$ 12-month (JAN-DEC) matrix generation per station-year.
-        * **WMO Integrity Screening:** Evaluates missing days (NA) against scientific thresholds before statistical aggregation.
-        * **Interactive Visuals:** Interactive daily intensity heatmaps and annual time-series charts.
+        * **Multi-Parameter Support:** Quick parameter switcher between Rainfall (*mm*) and Air Temperature (*°C*).
+        * **WMO Integrity Screening:** Screens missing data (NA) compliant with scientific thresholds before statistical computation.
+        * **Interactive Visuals:** Dynamic daily matrix heatmaps and annual time-series charts.
         """,
         "btn_download_wmo": "📥 Download WMO-No. 1203 Document (PDF)",
         "stations_ready": "{count} Station(s) Found",
         "download_zip": "📦 Download All (.ZIP)",
         "zip_filename": "All_Stations_Climatology_Reports.zip",
+        "select_param": "Select Climate Parameter:",
+        "param_rain": "🌧️ Rainfall (Hujan)",
+        "param_temp": "🌡️ Air Temperature (Suhu)",
         "select_station": "Select Station:",
         "station_name": "Station",
         "record_period": "Record Period",
-        "total_records": "Total Rows",
         "completeness_rate": "Data Completeness",
         "invalid_months": "Incomplete Months",
-        "alert_incomplete": "⚠️ **Advisory:** There are **{count} month(s)** failing data completeness criteria ({rule}). Monthly statistics are marked as `N.A (Incomplete)`.",
+        "alert_incomplete": "⚠️ **Advisory:** There are **{count} month(s)** failing data completeness criteria ({rule}). Values are marked as `N.A (Incomplete)`.",
         "subtab_form": "Record Sheets & Download",
         "subtab_charts": "Data Visuals",
         "download_excel": "📥 Download Excel ({station})",
         "plot_type": "Select Chart Type:",
         "color_theme": "Color Theme:",
-        "opt_heatmap": "Daily Rainfall Matrix (Heatmap)",
-        "opt_trend": "Annual Rainfall Trend (Time-Series)",
+        "opt_heatmap": "Daily Matrix (Heatmap)",
+        "opt_trend": "Annual Time-Series Trend",
         "opt_normals": "Monthly Average Profile (Normals)",
         "select_year_heat": "Select Year:",
-        "heat_title": "Daily Rainfall Intensity Matrix — {station} ({year})",
+        "heat_title": "Daily Matrix for {param} — {station} ({year})",
         "axis_month": "Month",
         "axis_day": "Day",
-        "axis_rain": "Rainfall (mm)",
         "axis_year": "Year",
-        "axis_avg_rain": "Average Rainfall (mm)",
-        "trend_title": "Annual Rainfall Trend — {station} ({min_yr} - {max_yr})",
+        "trend_title": "Annual Trend for {param} — {station} ({min_yr} - {max_yr})",
         "trend_avg_label": "Average",
-        "norm_title": "Monthly Average Rainfall Profile — {station}",
-        "temp_title": "Air Temperature Analysis Module",
-        "temp_desc": "The temperature module will be enabled once Maximum/Minimum data formats are supplied.",
+        "norm_title": "Monthly Average Profile for {param} — {station}",
         "qc_title": "Data Integrity Audit Log (WMO-No. 1203)",
         "qc_filter_failed": "Filter: Show incomplete / missing data months only",
         "download_qc_csv": "📥 Download Audit Log (.CSV)",
@@ -174,12 +170,12 @@ with st.sidebar:
     )
 
 # ---------------------------------------------------------
-# 4. PENGEPALA MINIMALIS (CLEAN HEADER)
+# 4. PENGEPALA MINIMALIS
 # ---------------------------------------------------------
 header_col1, header_col2 = st.columns([1, 6])
 with header_col1:
     try:
-        st.image("logo_met.png", width=140)
+        st.image("logo_met.png", width=135)
     except:
         st.write("🌤️")
 
@@ -207,12 +203,12 @@ def process_multiple_aaws_files(files_list):
                     station_name = f"Station_{sheet}"
                     
                 data = df.iloc[11:].copy().iloc[:, :4]
-                data.columns = ['Year', 'Month', 'Day', 'Rainfall']
+                data.columns = ['Year', 'Month', 'Day', 'Value']
                 data['Year'] = pd.to_numeric(data['Year'], errors='coerce')
                 data['Month'] = pd.to_numeric(data['Month'], errors='coerce')
                 data['Day'] = pd.to_numeric(data['Day'], errors='coerce')
-                data['Rainfall_Numeric'] = pd.to_numeric(data['Rainfall'], errors='coerce')
-                data['Rainfall_Display'] = data['Rainfall']
+                data['Value_Numeric'] = pd.to_numeric(data['Value'], errors='coerce')
+                data['Value_Display'] = data['Value']
                 
                 data = data.dropna(subset=['Year', 'Month', 'Day'])
                 data = data[(data['Year'] > 1900) & (data['Year'] < 2100)]
@@ -252,7 +248,7 @@ def generate_qc_audit_table(df_station, rule, t_dict):
     month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
     for yr in sorted(df_station['Year'].unique()):
         df_yr = df_station[df_station['Year'] == yr]
-        pivot_num = df_yr.pivot(index='Day', columns='Month', values='Rainfall_Numeric')
+        pivot_num = df_yr.pivot(index='Day', columns='Month', values='Value_Numeric')
         pivot_num = pivot_num.reindex(index=range(1, 32), columns=range(1, 13))
         for m in range(1, 13):
             col_data = pivot_num[m]
@@ -269,42 +265,63 @@ def generate_qc_audit_table(df_station, rule, t_dict):
             })
     return pd.DataFrame(qc_records)
 
-def generate_excel_for_station(station_name, df_station, rule):
+def generate_excel_for_station(station_name, df_station, rule, param_type):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         years = sorted(df_station['Year'].unique())
         month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
         has_written = False
+        
         for yr in years:
             df_yr = df_station[df_station['Year'] == yr]
             if df_yr.empty:
                 continue
-            pivot_num = df_yr.pivot(index='Day', columns='Month', values='Rainfall_Numeric').reindex(index=range(1, 32), columns=range(1, 13))
-            pivot_display = df_yr.pivot(index='Day', columns='Month', values='Rainfall_Display').reindex(index=range(1, 32), columns=range(1, 13))
-            total_rain, rain_days, highest_fall, highest_date = [], [], [], []
+            pivot_num = df_yr.pivot(index='Day', columns='Month', values='Value_Numeric').reindex(index=range(1, 32), columns=range(1, 13))
+            pivot_display = df_yr.pivot(index='Day', columns='Month', values='Value_Display').reindex(index=range(1, 32), columns=range(1, 13))
+            
+            stat_row1, stat_row2, stat_row3, stat_row4 = [], [], [], []
+            
             for m in range(1, 13):
                 col_data = pivot_num[m]
                 is_valid, _, _ = evaluate_month_qc(col_data, rule)
+                
                 if is_valid:
-                    tot = col_data.sum(skipna=True)
-                    total_rain.append(round(tot, 1) if pd.notna(tot) else "N.A")
-                    rain_days.append((col_data > 0.1).sum())
-                    highest_fall.append(round(col_data.max(skipna=True), 1) if pd.notna(col_data.max(skipna=True)) else "N.A")
-                    highest_date.append(int(col_data.idxmax(skipna=True)) if pd.notna(col_data.idxmax(skipna=True)) else "-")
+                    if param_type == "Rainfall":
+                        tot = col_data.sum(skipna=True)
+                        stat_row1.append(round(tot, 1) if pd.notna(tot) else "N.A")
+                        stat_row2.append((col_data > 0.1).sum())
+                        stat_row3.append(round(col_data.max(skipna=True), 1) if pd.notna(col_data.max(skipna=True)) else "N.A")
+                        stat_row4.append(int(col_data.idxmax(skipna=True)) if pd.notna(col_data.idxmax(skipna=True)) else "-")
+                    else: # Temperature
+                        mean_temp = col_data.mean(skipna=True)
+                        stat_row1.append(round(mean_temp, 1) if pd.notna(mean_temp) else "N.A")
+                        stat_row2.append(round(col_data.max(skipna=True), 1) if pd.notna(col_data.max(skipna=True)) else "N.A")
+                        stat_row3.append(round(col_data.min(skipna=True), 1) if pd.notna(col_data.min(skipna=True)) else "N.A")
+                        rng = col_data.max(skipna=True) - col_data.min(skipna=True)
+                        stat_row4.append(round(rng, 1) if pd.notna(rng) else "N.A")
                 else:
-                    total_rain.append("N.A (Incomplete)")
-                    rain_days.append("N.A")
-                    highest_fall.append("N.A")
-                    highest_date.append("-")
+                    stat_row1.append("N.A (Incomplete)")
+                    stat_row2.append("N.A")
+                    stat_row3.append("N.A")
+                    stat_row4.append("-")
+                    
             report_df = pivot_display.copy()
-            report_df.loc['TOTAL'] = total_rain
-            report_df.loc['No. Of Days (>0.1mm)'] = rain_days
-            report_df.loc['Highest Fall'] = highest_fall
-            report_df.loc['Date of Highest'] = highest_date
+            if param_type == "Rainfall":
+                report_df.loc['TOTAL (mm)'] = stat_row1
+                report_df.loc['No. Of Days (>0.1mm)'] = stat_row2
+                report_df.loc['Highest Fall (mm)'] = stat_row3
+                report_df.loc['Date of Highest'] = stat_row4
+            else:
+                report_df.loc['MEAN TEMP (°C)'] = stat_row1
+                report_df.loc['MAX TEMP (°C)'] = stat_row2
+                report_df.loc['MIN TEMP (°C)'] = stat_row3
+                report_df.loc['TEMP RANGE (°C)'] = stat_row4
+                
             report_df.columns = month_names
             report_df.index.name = "DATE"
             report_df.to_excel(writer, sheet_name=str(yr)[:31])
             has_written = True
+            
         if not has_written:
             pd.DataFrame({"Note": ["No Data"]}).to_excel(writer, sheet_name="No Data")
     output.seek(0)
@@ -315,12 +332,11 @@ if uploaded_files:
     stations_data = process_multiple_aaws_files(uploaded_files)
 
 # ---------------------------------------------------------
-# 6. TAB NAVIGASI MINIMALIS
+# 6. TAB NAVIGASI TIGA SEKSYEN
 # ---------------------------------------------------------
-tab_home, tab_rain, tab_temp, tab_qc = st.tabs([
+tab_home, tab_analysis, tab_qc = st.tabs([
     t["nav_home"], 
-    t["nav_rain"], 
-    t["nav_temp"], 
+    t["nav_analysis"], 
     t["nav_qc"]
 ])
 
@@ -329,7 +345,6 @@ with tab_home:
     st.markdown(f"#### {t['home_title']}")
     st.write(t["home_desc"])
     st.markdown(t["home_points"])
-    
     st.write("")
     try:
         with open("WMO Guidelines on the Calculation of Climate Normals_en.pdf", "rb") as f:
@@ -341,32 +356,42 @@ with tab_home:
             mime="application/pdf"
         )
     except:
-        st.caption("ℹ️ Fail rujukan WMO-No. 1203 PDF tersedia dalam folder projek.")[cite: 1]
+        st.caption("ℹ️ Fail rujukan WMO-No. 1203 PDF tersedia dalam folder projek.")
         
     if not uploaded_files:
         st.info(t["info_upload"])
 
-# === TAB 2: HUJAN ===
-with tab_rain:
+# === TAB 2: ANALISIS PARAMETER ===
+with tab_analysis:
     if uploaded_files and stations_data:
-        col_top1, col_top2 = st.columns([3, 1])
-        with col_top1:
-            st.caption(t["stations_ready"].format(count=len(stations_data)))
-        with col_top2:
+        # Suis Pemilih Parameter
+        col_param1, col_param2 = st.columns([2, 1])
+        with col_param1:
+            chosen_param_label = st.radio(
+                t["select_param"],
+                options=[t["param_rain"], t["param_temp"]],
+                horizontal=True
+            )
+            param_mode = "Rainfall" if chosen_param_label == t["param_rain"] else "Temperature"
+            unit_str = "mm" if param_mode == "Rainfall" else "°C"
+            
+        with col_param2:
             zip_buffer = io.BytesIO()
             with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
                 for st_name, st_df in stations_data.items():
-                    excel_bytes = generate_excel_for_station(st_name, st_df, qc_rule)
+                    excel_bytes = generate_excel_for_station(st_name, st_df, qc_rule, param_mode)
                     clean_st_name = "".join([c for c in st_name if c.isalnum() or c in (' ', '_', '-')]).strip()
-                    zip_file.writestr(f"Climatology_{clean_st_name.replace(' ', '_')}.xlsx", excel_bytes.getvalue())
+                    zip_file.writestr(f"{param_mode}_{clean_st_name.replace(' ', '_')}.xlsx", excel_bytes.getvalue())
             zip_buffer.seek(0)
             st.download_button(
                 label=t["download_zip"],
                 data=zip_buffer,
-                file_name=t["zip_filename"],
+                file_name=f"{param_mode}_{t['zip_filename']}",
                 mime="application/zip",
                 type="primary"
             )
+            
+        st.divider()
         
         selected_stesen = st.selectbox(t["select_station"], options=list(stations_data.keys()))
         df_stesen = stations_data[selected_stesen]
@@ -375,7 +400,7 @@ with tab_rain:
         qc_df_station = generate_qc_audit_table(df_stesen, qc_rule, t)
         total_months = len(qc_df_station)
         incomplete_months_count = (qc_df_station[t["qc_col_status"]] == t["qc_status_incomp"]).sum()
-        total_missing_days = df_stesen['Rainfall_Numeric'].isna().sum()
+        total_missing_days = df_stesen['Value_Numeric'].isna().sum()
         completeness_pct = ((len(df_stesen) - total_missing_days) / len(df_stesen)) * 100
         
         m1, m2, m3, m4 = st.columns(4)
@@ -390,12 +415,12 @@ with tab_rain:
         sub_form, sub_plots = st.tabs([t["subtab_form"], t["subtab_charts"]])
         
         with sub_form:
-            excel_file = generate_excel_for_station(selected_stesen, df_stesen, qc_rule)
+            excel_file = generate_excel_for_station(selected_stesen, df_stesen, qc_rule, param_mode)
             clean_st_name = "".join([c for c in selected_stesen if c.isalnum() or c in (' ', '_', '-')]).strip()
             st.download_button(
                 label=t["download_excel"].format(station=selected_stesen),
                 data=excel_file,
-                file_name=f"Borang_Klimatologi_{clean_st_name.replace(' ', '_')}.xlsx",
+                file_name=f"Borang_{param_mode}_{clean_st_name.replace(' ', '_')}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
             st.dataframe(df_stesen.head(15), use_container_width=True)
@@ -411,60 +436,65 @@ with tab_rain:
                 chart_choice_label = st.selectbox(t["plot_type"], options=list(chart_options_map.keys()))
                 chart_choice = chart_options_map[chart_choice_label]
             with ctrl_col2:
-                color_choice = st.selectbox(t["color_theme"], options=["Blues", "Viridis", "YlGnBu", "Spectral", "Plasma", "Teal"])
+                default_palette = "Blues" if param_mode == "Rainfall" else "Thermal"
+                color_choice = st.selectbox(t["color_theme"], options=["Blues", "Thermal", "Viridis", "YlGnBu", "Spectral", "Plasma", "Teal"], index=0 if param_mode=="Rainfall" else 1)
                 
             if chart_choice == "Heatmap":
                 years_list = sorted(df_stesen['Year'].unique())
                 chosen_year = st.selectbox(t["select_year_heat"], options=years_list, index=len(years_list)-1)
                 df_heat = df_stesen[df_stesen['Year'] == chosen_year]
-                heat_pivot = df_heat.pivot(index='Day', columns='Month', values='Rainfall_Numeric').reindex(index=range(1, 32), columns=range(1, 13))
+                heat_pivot = df_heat.pivot(index='Day', columns='Month', values='Value_Numeric').reindex(index=range(1, 32), columns=range(1, 13))
                 month_labels = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
                 fig_heat = px.imshow(
                     heat_pivot,
-                    labels=dict(x=t["axis_month"], y=t["axis_day"], color=t["axis_rain"]),
+                    labels=dict(x=t["axis_month"], y=t["axis_day"], color=f"{param_mode} ({unit_str})"),
                     x=month_labels,
                     y=[str(d) for d in range(1, 32)],
                     color_continuous_scale=color_choice,
                     aspect="auto",
-                    title=t["heat_title"].format(station=selected_stesen, year=chosen_year)
+                    title=t["heat_title"].format(param=param_mode, station=selected_stesen, year=chosen_year)
                 )
                 fig_heat.update_layout(height=600, margin=dict(l=20, r=20, t=40, b=20))
                 st.plotly_chart(fig_heat, use_container_width=True)
                 
             elif chart_choice == "Trend":
-                annual_df = df_stesen.groupby('Year')['Rainfall_Numeric'].sum().reset_index()
-                mean_val = annual_df['Rainfall_Numeric'].mean()
+                if param_mode == "Rainfall":
+                    annual_df = df_stesen.groupby('Year')['Value_Numeric'].sum().reset_index()
+                    val_label = "Jumlah Hujan (mm)"
+                else:
+                    annual_df = df_stesen.groupby('Year')['Value_Numeric'].mean().reset_index()
+                    val_label = "Purata Suhu (°C)"
+                    
+                mean_val = annual_df['Value_Numeric'].mean()
                 fig_trend = px.bar(
-                    annual_df, x='Year', y='Rainfall_Numeric', color='Rainfall_Numeric',
+                    annual_df, x='Year', y='Value_Numeric', color='Value_Numeric',
                     color_continuous_scale=color_choice,
-                    labels={'Rainfall_Numeric': t["axis_rain"], 'Year': t["axis_year"]},
-                    title=t["trend_title"].format(station=selected_stesen, min_yr=min_yr, max_yr=max_yr)
+                    labels={'Value_Numeric': val_label, 'Year': t["axis_year"]},
+                    title=t["trend_title"].format(param=param_mode, station=selected_stesen, min_yr=min_yr, max_yr=max_yr)
                 )
-                fig_trend.add_hline(y=mean_val, line_dash="dash", line_color="red", annotation_text=f"{t['trend_avg_label']}: {mean_val:.1f} mm")
+                fig_trend.add_hline(y=mean_val, line_dash="dash", line_color="red", annotation_text=f"{t['trend_avg_label']}: {mean_val:.1f} {unit_str}")
                 fig_trend.update_layout(margin=dict(l=20, r=20, t=40, b=20))
                 st.plotly_chart(fig_trend, use_container_width=True)
                 
             elif chart_choice == "Normals":
                 month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-                month_df = df_stesen.groupby('Month')['Rainfall_Numeric'].mean().reset_index()
+                month_df = df_stesen.groupby('Month')['Value_Numeric'].mean().reset_index()
                 month_df['Month_Name'] = month_df['Month'].apply(lambda x: month_names[x-1])
+                val_label = "Purata Hujan (mm)" if param_mode == "Rainfall" else "Purata Suhu (°C)"
+                
                 fig_norm = px.line(
-                    month_df, x='Month_Name', y='Rainfall_Numeric', markers=True,
-                    title=t["norm_title"].format(station=selected_stesen),
-                    labels={'Rainfall_Numeric': t["axis_avg_rain"], 'Month_Name': t["axis_month"]}
+                    month_df, x='Month_Name', y='Value_Numeric', markers=True,
+                    title=t["norm_title"].format(param=param_mode, station=selected_stesen),
+                    labels={'Value_Numeric': val_label, 'Month_Name': t["axis_month"]}
                 )
-                fig_norm.update_traces(line_color="#1f77b4", marker=dict(size=8))
+                line_col = "#1f77b4" if param_mode == "Rainfall" else "#d62728"
+                fig_norm.update_traces(line_color=line_col, marker=dict(size=8))
                 fig_norm.update_layout(margin=dict(l=20, r=20, t=40, b=20))
                 st.plotly_chart(fig_norm, use_container_width=True)
     else:
         st.info(t["info_upload"])
 
-# === TAB 3: SUHU ===
-with tab_temp:
-    st.markdown(f"#### {t['temp_title']}")
-    st.info(t["temp_desc"])
-
-# === TAB 4: QC ===
+# === TAB 3: QC ===
 with tab_qc:
     st.markdown(f"#### {t['qc_title']}")
     if uploaded_files and stations_data:
