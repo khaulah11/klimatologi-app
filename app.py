@@ -9,7 +9,7 @@ import plotly.express as px
 # 1. TETAPAN HALAMAN
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="Sistem Automasi Klimatologi MetMalaysia",
+    page_title="MetMalaysia Climatology System",
     layout="wide",
     page_icon="🌤️"
 )
@@ -19,264 +19,178 @@ st.set_page_config(
 # ---------------------------------------------------------
 TEXTS = {
     "BM": {
-        "portal_tag": "PORTAL DALAMAN RASMI",
-        "agency_title": "JABATAN METEOROLOGI MALAYSIA",
-        "branch_title": "Pejabat Meteorologi Sabah | Sistem Automasi Analisis Klimatologi",
-        "nav_home": "UTAMA",
-        "nav_rain": "HUJAN (RAINFALL)",
-        "nav_temp": "SUHU (TEMPERATURE)",
-        "nav_qc": "SEMAKAN KUALITI & WMO",
-        "sidebar_header": "📁 PANEL KAWALAN & DATA",
-        "upload_label": "Muat naik fail raw AAWS (.xls / .xlsx)",
-        "upload_success": "✅ Berjaya memuat naik {count} fail AAWS!",
-        "qc_mode_label": "⚙️ Piawaian Penapisan Data Hilang (WMO):",
-        "home_card_title": "📌 Sistem Automasi Rekod & Verifikasi Klimatologi",
-        "home_card_desc": """
-        Sistem ini dibangunkan untuk memproses, memformat, dan mengesahkan data siri masa daripada stesen **Automatic Agricultural Weather Station (AAWS)** ke format piawai rekod klimatologi kebangsaan mengikut garis panduan **WMO-No. 1203**.
+        "title": "Sistem Automasi Analisis Klimatologi",
+        "subtitle": "Jabatan Meteorologi Malaysia (MetMalaysia) | Pejabat Meteorologi Sabah",
+        "nav_home": "Utama",
+        "nav_rain": "Hujan",
+        "nav_temp": "Suhu",
+        "nav_qc": "Semakan QC & WMO",
+        "sidebar_header": "Data & Tetapan",
+        "upload_label": "Muat naik fail siri masa AAWS (.xls / .xlsx)",
+        "upload_success": "✅ {count} fail berjaya dimuat naik.",
+        "qc_mode_label": "Piawaian Data Hilang (WMO):",
+        "home_title": "Panduan & Standard Pengiraan",
+        "home_desc": "Sistem automasi bagi penukaran data siri masa AAWS kepada format Borang Rekod Hujan Piawai serta penapisan integriti data mengikut panduan WMO-No. 1203.",
+        "home_points": """
+        * **Format Piawai:** Penjanaan automatik matriks 31 hari $\\times$ 12 bulan (JAN–DEC) bagi setiap tahun stesen.
+        * **Tapisan Integriti WMO:** Pengesanan hari hilang (NA) mengikut piawaian saintifik sebelum jumlah/purata dikira.
+        * **Visualisasi:** Analisis matriks keamatan hujan harian (Heatmap) dan siri masa tahunan secara interaktif.
         """,
-        "home_features": """
-        * 📊 **Penjanaan Format Grid Piawai:** Menyusun siri masa kepada grid 31 hari $\\times$ 12 bulan (JAN–DEC) bagi setiap tahun stesen.
-        * 🛡️ **Pemeriksaan Integriti WMO:** Menapis data hilang (*missing data*) mengikut piawaian antarabangsa sebelum statistik dihitung.
-        * 📈 **Visualisasi Interaktif:** Matriks keamatan hujan harian (*Heatmap*) dan siri masa tahunan yang menyokong pelbagai skim warna.
-        """,
-        "wmo_announcement_title": "📢 Piawaian WMO-No. 1203",
-        "wmo_announcement_desc": "Garis panduan rasmi *Calculation of Climate Normals* digunapakai untuk tapisan kesempurnaan data.",
-        "btn_download_wmo": "📥 Muat Turun WMO-No. 1203 (PDF)",
-        "stations_ready": "📌 {count} Stesen Tersedia",
-        "download_zip": "📦 MUAT TURUN SEMUA (.ZIP)",
+        "btn_download_wmo": "📥 Muat Turun Dokumen WMO-No. 1203 (PDF)",
+        "stations_ready": "{count} Stesen Dikesan",
+        "download_zip": "📦 Muat Turun Semua (.ZIP)",
         "zip_filename": "Laporan_Klimatologi_Semua_Stesen.zip",
         "select_station": "Pilih Stesen:",
-        "station_name": "Nama Stesen",
-        "record_period": "Sela Masa Rekod",
-        "total_records": "Jumlah Rekod",
+        "station_name": "Stesen",
+        "record_period": "Tempoh Rekod",
+        "total_records": "Jumlah Baris",
         "completeness_rate": "Kesempurnaan Data",
-        "invalid_months": "Bulan Tidak Sah (Incomplete)",
-        "alert_incomplete": "⚠️ **Perhatian Pegawai:** Terdapat **{count} bulan** gagal melepasi piawaian ({rule}). Jumlah bulanan ditandakan sebagai `N.A (Incomplete)`.",
-        "subtab_form": "📄 Borang Rekod & Muat Turun",
-        "subtab_charts": "📈 Visualisasi Interaktif",
+        "invalid_months": "Bulan Tidak Lengkap",
+        "alert_incomplete": "⚠️ **Perhatian:** Terdapat **{count} bulan** tidak memenuhi piawaian data lengkap ({rule}). Statistik bagi bulan berkenaan ditandakan sebagai `N.A (Incomplete)`.",
+        "subtab_form": "Borang Rekod & Muat Turun",
+        "subtab_charts": "Visualisasi Data",
         "download_excel": "📥 Muat Turun Excel ({station})",
-        "preview_title": "#### 🔍 Pratonton Data Terkini (20 Baris Terawal)",
-        "plot_type": "📊 Jenis Graf:",
-        "color_theme": "🎨 Tema Warna:",
-        "opt_heatmap": "🌧️ Matriks Harian Hujan (Heatmap)",
-        "opt_trend": "📈 Trend Jumlah Hujan Tahunan (Time-Series)",
-        "opt_normals": "📊 Purata Taburan Hujan Bulanan (Normals)",
-        "select_year_heat": "Pilih Tahun Heatmap:",
-        "heat_title": "Matriks Keamatan Hujan Harian bagi {station} ({year})",
+        "plot_type": "Pilih Jenis Graf:",
+        "color_theme": "Skim Warna:",
+        "opt_heatmap": "Matriks Harian Hujan (Heatmap)",
+        "opt_trend": "Trend Hujan Tahunan (Time-Series)",
+        "opt_normals": "Purata Profil Bulanan (Normals)",
+        "select_year_heat": "Pilih Tahun:",
+        "heat_title": "Matriks Keamatan Hujan Harian — {station} ({year})",
         "axis_month": "Bulan",
         "axis_day": "Hari",
         "axis_rain": "Hujan (mm)",
         "axis_year": "Tahun",
         "axis_avg_rain": "Purata Hujan (mm)",
-        "trend_title": "Trend Jumlah Hujan Tahunan bagi {station} ({min_yr} - {max_yr})",
+        "trend_title": "Trend Hujan Tahunan — {station} ({min_yr} - {max_yr})",
         "trend_avg_label": "Purata",
-        "norm_title": "Corak Purata Hujan Bulanan (Normal Profile) bagi {station}",
-        "temp_title": "🌡️ Modul Analisis Suhu Udara (Temperature)",
-        "temp_desc": "Modul Suhu Udara sedia diselaraskan mengikut format cerapan piawai WMO.",
-        "qc_title": "📋 Laporan Audit Kualiti Data & Integriti WMO",
-        "qc_select_station": "Pilih Stesen untuk Log Audit:",
-        "qc_filter_failed": "🔍 Paparkan Bulan Tidak Sah / Ada Data Hilang Sahaja",
+        "norm_title": "Profil Purata Hujan Bulanan — {station}",
+        "temp_title": "Modul Analisis Suhu Udara",
+        "temp_desc": "Modul suhu akan diaktifkan apabila format data Maximum/Minimum dibekalkan.",
+        "qc_title": "Log Audit Integriti Data (WMO-No. 1203)",
+        "qc_filter_failed": "Tapis: Paparkan bulan tidak lengkap / ada NA sahaja",
         "download_qc_csv": "📥 Muat Turun Log Audit (.CSV)",
         "qc_col_year": "Tahun",
         "qc_col_month": "Bulan",
         "qc_col_na": "Hari Hilang (NA)",
         "qc_col_consec": "Maks. Berturut-turut",
         "qc_col_status": "Status Integriti",
-        "qc_col_action": "Tindakan Pengiraan",
-        "qc_status_valid": "✅ Sah (Valid)",
-        "qc_status_incomp": "❌ Tidak Lengkap (Incomplete)",
-        "qc_status_perfect": "🟢 100% Lengkap",
+        "qc_col_action": "Tindakan",
+        "qc_status_valid": "Sah (Valid)",
+        "qc_status_incomp": "Tidak Lengkap (Incomplete)",
+        "qc_status_perfect": "100% Lengkap",
         "qc_act_calc": "Dikira (Abaikan NA)",
         "qc_act_reject": "Ditolak (N.A Incomplete)",
-        "info_upload": "👈 Sila muat naik fail raw AAWS di menu tepi untuk memulakan pemprosesan."
+        "info_upload": "Sila muat naik fail data AAWS di bar sisi kiri untuk memulakan analisis."
     },
     "EN": {
-        "portal_tag": "OFFICIAL INTERNAL PORTAL",
-        "agency_title": "MALAYSIAN METEOROLOGICAL DEPARTMENT",
-        "branch_title": "Sabah Meteorological Office | Climatology Analysis Automation System",
-        "nav_home": "HOME",
-        "nav_rain": "RAINFALL",
-        "nav_temp": "TEMPERATURE",
-        "nav_qc": "DATA QC & WMO",
-        "sidebar_header": "📁 CONTROL PANEL & DATA",
-        "upload_label": "Upload raw AAWS files (.xls / .xlsx)",
-        "upload_success": "✅ Successfully uploaded {count} AAWS file(s)!",
-        "qc_mode_label": "⚙️ Missing Data Standard (WMO):",
-        "home_card_title": "📌 Climatology Records Automation & Verification",
-        "home_card_desc": """
-        This system processes, structures, and validates time-series data from **Automatic Agricultural Weather Stations (AAWS)** into national standardized climatological record sheets in compliance with **WMO-No. 1203** guidelines.
+        "title": "Climatology Analysis Automation System",
+        "subtitle": "Malaysian Meteorological Department (MetMalaysia) | Sabah Meteorological Office",
+        "nav_home": "Home",
+        "nav_rain": "Rainfall",
+        "nav_temp": "Temperature",
+        "nav_qc": "QC & WMO Audit",
+        "sidebar_header": "Data & Controls",
+        "upload_label": "Upload AAWS time-series files (.xls / .xlsx)",
+        "upload_success": "✅ {count} file(s) successfully uploaded.",
+        "qc_mode_label": "Missing Data Standard (WMO):",
+        "home_title": "User Guide & Calculation Standards",
+        "home_desc": "Automated system for converting AAWS time-series data into standard climatological record sheets and screening data integrity per WMO-No. 1203 guidelines.",
+        "home_points": """
+        * **Standard Grid Format:** Automated 31-day $\\times$ 12-month (JAN-DEC) matrix generation per station-year.
+        * **WMO Integrity Screening:** Evaluates missing days (NA) against scientific thresholds before statistical aggregation.
+        * **Interactive Visuals:** Interactive daily intensity heatmaps and annual time-series charts.
         """,
-        "home_features": """
-        * 📊 **Standard Grid Generation:** Restructures data into 31-day $\\times$ 12-month (JAN-DEC) grids for each year.
-        * 🛡️ **WMO Integrity Screening:** Filters missing observations before statistical computation.
-        * 📈 **Interactive Analytics:** Daily rainfall intensity heatmaps and time-series trends supporting customizable color themes.
-        """,
-        "wmo_announcement_title": "📢 WMO-No. 1203 Standard",
-        "wmo_announcement_desc": "Official WMO guidelines for Calculation of Climate Normals applied for data completeness verification.",
-        "btn_download_wmo": "📥 Download WMO-No. 1203 (PDF)",
-        "stations_ready": "📌 {count} Station(s) Ready",
-        "download_zip": "📦 DOWNLOAD ALL (.ZIP)",
+        "btn_download_wmo": "📥 Download WMO-No. 1203 Document (PDF)",
+        "stations_ready": "{count} Station(s) Found",
+        "download_zip": "📦 Download All (.ZIP)",
         "zip_filename": "All_Stations_Climatology_Reports.zip",
         "select_station": "Select Station:",
-        "station_name": "Station Name",
+        "station_name": "Station",
         "record_period": "Record Period",
-        "total_records": "Total Records",
+        "total_records": "Total Rows",
         "completeness_rate": "Data Completeness",
-        "invalid_months": "Invalid Months (Incomplete)",
-        "alert_incomplete": "⚠️ **Officer Advisory:** There are **{count} month(s)** failing completeness standards ({rule}). Monthly totals are marked as `N.A (Incomplete)`.",
-        "subtab_form": "📄 Record Sheets & Download",
-        "subtab_charts": "📈 Interactive Analytics",
+        "invalid_months": "Incomplete Months",
+        "alert_incomplete": "⚠️ **Advisory:** There are **{count} month(s)** failing data completeness criteria ({rule}). Monthly statistics are marked as `N.A (Incomplete)`.",
+        "subtab_form": "Record Sheets & Download",
+        "subtab_charts": "Data Visuals",
         "download_excel": "📥 Download Excel ({station})",
-        "preview_title": "#### 🔍 Raw Data Preview (First 20 Records)",
-        "plot_type": "📊 Chart Type:",
-        "color_theme": "🎨 Color Theme:",
-        "opt_heatmap": "🌧️ Daily Rainfall Matrix (Heatmap)",
-        "opt_trend": "📈 Annual Total Rainfall Trend (Time-Series)",
-        "opt_normals": "📊 Monthly Average Rainfall (Normals)",
-        "select_year_heat": "Select Year for Heatmap:",
-        "heat_title": "Daily Rainfall Intensity Matrix for {station} ({year})",
+        "plot_type": "Select Chart Type:",
+        "color_theme": "Color Theme:",
+        "opt_heatmap": "Daily Rainfall Matrix (Heatmap)",
+        "opt_trend": "Annual Rainfall Trend (Time-Series)",
+        "opt_normals": "Monthly Average Profile (Normals)",
+        "select_year_heat": "Select Year:",
+        "heat_title": "Daily Rainfall Intensity Matrix — {station} ({year})",
         "axis_month": "Month",
         "axis_day": "Day",
         "axis_rain": "Rainfall (mm)",
         "axis_year": "Year",
         "axis_avg_rain": "Average Rainfall (mm)",
-        "trend_title": "Annual Total Rainfall Trend for {station} ({min_yr} - {max_yr})",
+        "trend_title": "Annual Rainfall Trend — {station} ({min_yr} - {max_yr})",
         "trend_avg_label": "Average",
-        "norm_title": "Monthly Average Rainfall Pattern (Normal Profile) for {station}",
-        "temp_title": "🌡️ Air Temperature Analysis Module",
-        "temp_desc": "The Temperature Module is structured for standard WMO meteorological parameters.",
-        "qc_title": "📋 Data Quality Audit Report & WMO Integrity",
-        "qc_select_station": "Select Station for Audit Log:",
-        "qc_filter_failed": "🔍 Display Incomplete / Missing Data Months Only",
+        "norm_title": "Monthly Average Rainfall Profile — {station}",
+        "temp_title": "Air Temperature Analysis Module",
+        "temp_desc": "The temperature module will be enabled once Maximum/Minimum data formats are supplied.",
+        "qc_title": "Data Integrity Audit Log (WMO-No. 1203)",
+        "qc_filter_failed": "Filter: Show incomplete / missing data months only",
         "download_qc_csv": "📥 Download Audit Log (.CSV)",
         "qc_col_year": "Year",
         "qc_col_month": "Month",
         "qc_col_na": "Missing Days (NA)",
         "qc_col_consec": "Max Consecutive",
         "qc_col_status": "Integrity Status",
-        "qc_col_action": "Calculation Action",
-        "qc_status_valid": "✅ Valid",
-        "qc_status_incomp": "❌ Incomplete",
-        "qc_status_perfect": "🟢 100% Complete",
+        "qc_col_action": "Action",
+        "qc_status_valid": "Valid",
+        "qc_status_incomp": "Incomplete",
+        "qc_status_perfect": "100% Complete",
         "qc_act_calc": "Calculated (Exclude NA)",
         "qc_act_reject": "Rejected (N.A Incomplete)",
-        "info_upload": "👈 Please upload raw AAWS files in the sidebar to begin processing."
+        "info_upload": "Please upload AAWS data files in the left sidebar to start analysis."
     }
 }
 
 # ---------------------------------------------------------
-# 3. SIDEBAR: KAWALAN & DATA
+# 3. SIDEBAR: KAWALAN & FAIL
 # ---------------------------------------------------------
-st.sidebar.header("⚙️ Tetapan / Settings")
-selected_lang = st.sidebar.selectbox("🌐 Bahasa / Language", options=["Bahasa Melayu", "English"])
-lang_key = "BM" if selected_lang == "Bahasa Melayu" else "EN"
-t = TEXTS[lang_key]
-
-st.sidebar.divider()
-qc_rule = st.sidebar.radio(
-    t["qc_mode_label"],
-    options=["WMO Standard (11/5 Rule)", "Strict Rule (5/3 Rule)", "No Filter (Raw Data)"],
-    index=0
-)
-
-st.sidebar.header(t["sidebar_header"])
-uploaded_files = st.sidebar.file_uploader(
-    t["upload_label"], 
-    type=["xls", "xlsx"],
-    accept_multiple_files=True
-)
-
-# ---------------------------------------------------------
-# 4. HEADER RASMI METMALAYSIA (GOVERNMENT PORTAL STYLE)
-# ---------------------------------------------------------
-st.markdown("""
-<style>
-    /* Pengepala Utama Putih Rasmi */
-    .gov-header-container {
-        display: flex;
-        align-items: center;
-        padding: 10px 0 15px 0;
-        border-bottom: 2px solid #e2e8f0;
-    }
-    .gov-tag {
-        font-size: 11px;
-        letter-spacing: 1.5px;
-        font-weight: 700;
-        color: #4a5568;
-        margin-bottom: 2px;
-    }
-    .gov-main-title {
-        font-size: 26px;
-        font-weight: 800;
-        color: #1a2a4b;
-        letter-spacing: 0.5px;
-        margin: 0;
-        line-height: 1.2;
-    }
-    .gov-sub-title {
-        font-size: 13px;
-        color: #596780;
-        margin-top: 4px;
-        font-weight: 500;
-    }
+with st.sidebar:
+    selected_lang = st.selectbox("Language / Bahasa", options=["Bahasa Melayu", "English"])
+    lang_key = "BM" if selected_lang == "Bahasa Melayu" else "EN"
+    t = TEXTS[lang_key]
     
-    /* Kad Pengumuman / Side Box Hijau Zaitun */
-    .announcement-box {
-        background: linear-gradient(135deg, #8ba858 0%, #6e8b3d 100%);
-        border-radius: 8px;
-        padding: 16px 20px;
-        color: #ffffff;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-    }
-    .announcement-title {
-        font-size: 16px;
-        font-weight: 700;
-        margin-bottom: 6px;
-    }
-    .announcement-text {
-        font-size: 13px;
-        line-height: 1.4;
-        color: #f7fafc;
-    }
+    st.divider()
+    st.markdown(f"### {t['sidebar_header']}")
     
-    /* Kad Utama Putih */
-    .main-card {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 24px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-</style>
-""", unsafe_allow_html=True)
+    qc_rule = st.radio(
+        t["qc_mode_label"],
+        options=["WMO Standard (11/5 Rule)", "Strict Rule (5/3 Rule)", "No Filter (Raw Data)"],
+        index=0
+    )
+    
+    uploaded_files = st.file_uploader(
+        t["upload_label"], 
+        type=["xls", "xlsx"],
+        accept_multiple_files=True
+    )
 
-# Paparan Pengepala
-col_logo, col_heading = st.columns([1.2, 7])
-with col_logo:
+# ---------------------------------------------------------
+# 4. PENGEPALA MINIMALIS (CLEAN HEADER)
+# ---------------------------------------------------------
+header_col1, header_col2 = st.columns([1, 6])
+with header_col1:
     try:
-        st.image("logo_met.png", width=165)
+        st.image("logo_met.png", width=140)
     except:
         st.write("🌤️")
 
-with col_heading:
-    st.markdown(f"""
-    <div class="gov-tag">{t['portal_tag']}</div>
-    <div class="gov-main-title">{t['agency_title']}</div>
-    <div class="gov-sub-title">🏛️ {t['branch_title']}</div>
-    """, unsafe_allow_html=True)
+with header_col2:
+    st.markdown(f"### **{t['title']}**")
+    st.caption(f"🏛️ {t['subtitle']}")
+
+st.divider()
 
 # ---------------------------------------------------------
-# 5. NAVIGASI BAR HORIZONTAL BIRU GELAP (NAVY TABS)
-# ---------------------------------------------------------
-tab_home, tab_rain, tab_temp, tab_qc = st.tabs([
-    f"🔹 {t['nav_home']}", 
-    f"🌧️ {t['nav_rain']}", 
-    f"🌡️ {t['nav_temp']}", 
-    f"📋 {t['nav_qc']}"
-])
-
-# ---------------------------------------------------------
-# 6. FUNGSI PEMPROSESAN DATA AAWS
+# 5. FUNGSI PEMPROSESAN DATA AAWS
 # ---------------------------------------------------------
 def process_multiple_aaws_files(files_list):
     all_stations_data = {}
@@ -314,7 +228,7 @@ def process_multiple_aaws_files(files_list):
                     else:
                         all_stations_data[station_name] = data
         except Exception as e:
-            st.error(f"Error: {file.name} - {e}")
+            st.error(f"Ralat memproses {file.name}: {e}")
     return all_stations_data
 
 def evaluate_month_qc(series, rule):
@@ -401,52 +315,44 @@ if uploaded_files:
     stations_data = process_multiple_aaws_files(uploaded_files)
 
 # ---------------------------------------------------------
-# 7. KANDUNGAN SETIAP TAB UTAMA
+# 6. TAB NAVIGASI MINIMALIS
 # ---------------------------------------------------------
+tab_home, tab_rain, tab_temp, tab_qc = st.tabs([
+    t["nav_home"], 
+    t["nav_rain"], 
+    t["nav_temp"], 
+    t["nav_qc"]
+])
 
 # === TAB 1: UTAMA ===
 with tab_home:
-    col_main, col_side = st.columns([2.2, 1])
-    with col_main:
-        st.markdown(f"""
-        <div class="main-card">
-            <h3>{t['home_card_title']}</h3>
-            <p>{t['home_card_desc']}</p>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown(t["home_features"])
-        if not uploaded_files:
-            st.info(t["info_upload"])
-            
-    with col_side:
-        st.markdown(f"""
-        <div class="announcement-box">
-            <div class="announcement-title">{t['wmo_announcement_title']}</div>
-            <div class="announcement-text">{t['wmo_announcement_desc']}</div>
-        </div>
-        """, unsafe_allow_html=True)
-        st.write("")
-        try:
-            with open("WMO Guidelines on the Calculation of Climate Normals_en.pdf", "rb") as f:
-                pdf_bytes = f.read()
-            st.download_button(
-                label=t["btn_download_wmo"],
-                data=pdf_bytes,
-                file_name="WMO_Guidelines_Calculation_Climate_Normals_No1203.pdf",
-                mime="application/pdf",
-                use_container_width=True
-            )
-        except:
-            st.caption("ℹ️ Fail rujukan WMO PDF tersedia di sistem.")
+    st.markdown(f"#### {t['home_title']}")
+    st.write(t["home_desc"])
+    st.markdown(t["home_points"])
+    
+    st.write("")
+    try:
+        with open("WMO Guidelines on the Calculation of Climate Normals_en.pdf", "rb") as f:
+            pdf_bytes = f.read()
+        st.download_button(
+            label=t["btn_download_wmo"],
+            data=pdf_bytes,
+            file_name="WMO_Guidelines_Calculation_Climate_Normals_No1203.pdf",
+            mime="application/pdf"
+        )
+    except:
+        st.caption("ℹ️ Fail rujukan WMO-No. 1203 PDF tersedia dalam folder projek.")[cite: 1]
+        
+    if not uploaded_files:
+        st.info(t["info_upload"])
 
 # === TAB 2: HUJAN ===
 with tab_rain:
     if uploaded_files and stations_data:
-        st.success(t["upload_success"].format(count=len(uploaded_files)))
-        col_zip1, col_zip2 = st.columns([3, 1])
-        with col_zip1:
-            st.subheader(t["stations_ready"].format(count=len(stations_data)))
-        with col_zip2:
+        col_top1, col_top2 = st.columns([3, 1])
+        with col_top1:
+            st.caption(t["stations_ready"].format(count=len(stations_data)))
+        with col_top2:
             zip_buffer = io.BytesIO()
             with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
                 for st_name, st_df in stations_data.items():
@@ -461,7 +367,6 @@ with tab_rain:
                 mime="application/zip",
                 type="primary"
             )
-        st.divider()
         
         selected_stesen = st.selectbox(t["select_station"], options=list(stations_data.keys()))
         df_stesen = stations_data[selected_stesen]
@@ -477,12 +382,13 @@ with tab_rain:
         m1.metric(t["station_name"], selected_stesen)
         m2.metric(t["record_period"], f"{min_yr} - {max_yr}")
         m3.metric(t["completeness_rate"], f"{completeness_pct:.1f}%")
-        m4.metric(t["invalid_months"], f"{incomplete_months_count} / {total_months}", delta=f"-{incomplete_months_count}" if incomplete_months_count > 0 else None, delta_color="inverse")
+        m4.metric(t["invalid_months"], f"{incomplete_months_count} / {total_months}")
         
         if incomplete_months_count > 0:
             st.warning(t["alert_incomplete"].format(count=incomplete_months_count, rule=qc_rule))
             
         sub_form, sub_plots = st.tabs([t["subtab_form"], t["subtab_charts"]])
+        
         with sub_form:
             excel_file = generate_excel_for_station(selected_stesen, df_stesen, qc_rule)
             clean_st_name = "".join([c for c in selected_stesen if c.isalnum() or c in (' ', '_', '-')]).strip()
@@ -492,8 +398,7 @@ with tab_rain:
                 file_name=f"Borang_Klimatologi_{clean_st_name.replace(' ', '_')}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-            st.write(t["preview_title"])
-            st.dataframe(df_stesen.head(20), use_container_width=True)
+            st.dataframe(df_stesen.head(15), use_container_width=True)
             
         with sub_plots:
             ctrl_col1, ctrl_col2 = st.columns(2)
@@ -506,7 +411,7 @@ with tab_rain:
                 chart_choice_label = st.selectbox(t["plot_type"], options=list(chart_options_map.keys()))
                 chart_choice = chart_options_map[chart_choice_label]
             with ctrl_col2:
-                color_choice = st.selectbox(t["color_theme"], options=["Blues", "Viridis", "YlGnBu", "Spectral", "Plasma", "Turbo", "Teal"])
+                color_choice = st.selectbox(t["color_theme"], options=["Blues", "Viridis", "YlGnBu", "Spectral", "Plasma", "Teal"])
                 
             if chart_choice == "Heatmap":
                 years_list = sorted(df_stesen['Year'].unique())
@@ -523,7 +428,7 @@ with tab_rain:
                     aspect="auto",
                     title=t["heat_title"].format(station=selected_stesen, year=chosen_year)
                 )
-                fig_heat.update_layout(height=650)
+                fig_heat.update_layout(height=600, margin=dict(l=20, r=20, t=40, b=20))
                 st.plotly_chart(fig_heat, use_container_width=True)
                 
             elif chart_choice == "Trend":
@@ -536,6 +441,7 @@ with tab_rain:
                     title=t["trend_title"].format(station=selected_stesen, min_yr=min_yr, max_yr=max_yr)
                 )
                 fig_trend.add_hline(y=mean_val, line_dash="dash", line_color="red", annotation_text=f"{t['trend_avg_label']}: {mean_val:.1f} mm")
+                fig_trend.update_layout(margin=dict(l=20, r=20, t=40, b=20))
                 st.plotly_chart(fig_trend, use_container_width=True)
                 
             elif chart_choice == "Normals":
@@ -547,26 +453,27 @@ with tab_rain:
                     title=t["norm_title"].format(station=selected_stesen),
                     labels={'Rainfall_Numeric': t["axis_avg_rain"], 'Month_Name': t["axis_month"]}
                 )
-                fig_norm.update_traces(line_color="#1f77b4", marker=dict(size=9))
+                fig_norm.update_traces(line_color="#1f77b4", marker=dict(size=8))
+                fig_norm.update_layout(margin=dict(l=20, r=20, t=40, b=20))
                 st.plotly_chart(fig_norm, use_container_width=True)
     else:
         st.info(t["info_upload"])
 
 # === TAB 3: SUHU ===
 with tab_temp:
-    st.subheader(t["temp_title"])
+    st.markdown(f"#### {t['temp_title']}")
     st.info(t["temp_desc"])
 
 # === TAB 4: QC ===
 with tab_qc:
-    st.subheader(t["qc_title"])
+    st.markdown(f"#### {t['qc_title']}")
     if uploaded_files and stations_data:
-        qc_station_choice = st.selectbox(t["qc_select_station"], options=list(stations_data.keys()), key="qc_select")
+        qc_station_choice = st.selectbox(t["select_station"], options=list(stations_data.keys()), key="qc_select")
         qc_table = generate_qc_audit_table(stations_data[qc_station_choice], qc_rule, t)
-        filter_col1, _ = st.columns([2, 1])
-        with filter_col1:
-            show_failed_only = st.checkbox(t["qc_filter_failed"], value=False)
+        
+        show_failed_only = st.checkbox(t["qc_filter_failed"], value=False)
         display_qc_table = qc_table[qc_table[t["qc_col_na"]] > 0] if show_failed_only else qc_table
+        
         st.dataframe(display_qc_table, use_container_width=True)
         csv_buffer = display_qc_table.to_csv(index=False).encode('utf-8')
         st.download_button(
