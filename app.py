@@ -31,7 +31,7 @@ TEXTS = {
         1. **Muat Naik Fail:** Masukkan fail raw AAWS (`.xls` / `.xlsx`) di menu bar sisi kiri.
         2. **Pilih Parameter:** Gunakan toggle untuk bertukar antara **Hujan (*Rainfall*)** dan **Suhu (*Temperature*)**.
         3. **Penapisan WMO:** Semakan integriti data hilang (`NA`) automatik mengikut garis panduan **WMO-No. 1203**.
-        4. **Eksport Borang:** Jana dan muat turun Borang Grid Rekod Piawai secara individu atau pakej kelompok (`.ZIP`).
+        4. **Eksport Borang & Graf:** Jana borang rekod Excel atau muat turun fail graf interaktif (`.HTML`).
         """,
         "btn_download_wmo": "📥 Muat Turun WMO-No. 1203 (PDF)",
         "upload_label": "Muat naik fail siri masa AAWS (.xls / .xlsx)",
@@ -53,6 +53,7 @@ TEXTS = {
         "subtab_form": "📄 Borang Rekod Piawai & Muat Turun",
         "subtab_charts": "📈 Visualisasi Data & Analisis Julat",
         "download_excel": "📥 Muat Turun Excel ({station})",
+        "download_chart_html": "📥 Muat Turun Graf Interaktif ({chart}) [.HTML]",
         "plot_type": "Pilih Jenis Graf:",
         "color_theme": "Skim Warna:",
         "opt_heatmap": "🌧️ Matriks Harian (Heatmap)",
@@ -96,7 +97,7 @@ TEXTS = {
         1. **Upload Files:** Upload raw AAWS files (`.xls` / `.xlsx`) via the sidebar menu.
         2. **Select Parameter:** Switch dynamically between **Rainfall** and **Air Temperature**.
         3. **WMO Screening:** Missing data (`NA`) is audited automatically in compliance with **WMO-No. 1203**.
-        4. **Export Sheets:** Generate and download standard climatological record grids individually or in batch (`.ZIP`).
+        4. **Export Sheets & Visuals:** Generate Excel sheets or export interactive standalone `.HTML` charts.
         """,
         "btn_download_wmo": "📥 Download WMO-No. 1203 (PDF)",
         "upload_label": "Upload AAWS time-series files (.xls / .xlsx)",
@@ -118,6 +119,7 @@ TEXTS = {
         "subtab_form": "📄 Standard Sheets & Download",
         "subtab_charts": "📈 Interactive Visuals & Range Analytics",
         "download_excel": "📥 Download Excel ({station})",
+        "download_chart_html": "📥 Download Interactive Chart ({chart}) [.HTML]",
         "plot_type": "Select Chart Type:",
         "color_theme": "Color Theme:",
         "opt_heatmap": "🌧️ Daily Matrix (Heatmap)",
@@ -206,7 +208,7 @@ with header_col2:
 st.divider()
 
 # ---------------------------------------------------------
-# 5. FUNGSI PEMPROSESAN DATA DENGAN PENGECAMAN KETAT
+# 5. FUNGSI PEMPROSESAN DATA
 # ---------------------------------------------------------
 def detect_parameter_type(header_text):
     text_lower = header_text.lower()
@@ -337,7 +339,7 @@ def generate_excel_for_station(station_name, df_station, rule, param_type):
                         stat_row2.append((col_data > 0.1).sum())
                         stat_row3.append(round(col_data.max(skipna=True), 1) if pd.notna(col_data.max(skipna=True)) else "N.A")
                         stat_row4.append(int(col_data.idxmax(skipna=True)) if pd.notna(col_data.idxmax(skipna=True)) else "-")
-                    else: # Temperature
+                    else:
                         mean_temp = col_data.mean(skipna=True)
                         stat_row1.append(round(mean_temp, 1) if pd.notna(mean_temp) else "N.A")
                         stat_row2.append(round(col_data.max(skipna=True), 1) if pd.notna(col_data.max(skipna=True)) else "N.A")
@@ -470,6 +472,17 @@ with tab_analysis:
                     default_idx = 0 if param_mode == "Rainfall" else 1
                     color_choice = st.selectbox(t["color_theme"], options=["Blues", "Thermal", "Viridis", "YlGnBu", "Spectral", "Plasma", "Teal"], index=default_idx)
                     
+                # Konfigurasi muat turun imej resolusi tinggi terbina dalam Plotly
+                fig_config = {
+                    'toImageButtonOptions': {
+                        'format': 'png',
+                        'filename': f'{param_mode}_{selected_stesen}_{chart_choice}',
+                        'height': 800,
+                        'width': 1400,
+                        'scale': 2.5
+                    }
+                }
+                
                 # -----------------------------------------------------------------
                 # 1. HEATMAP (MATRIKS KEAMATAN HARIAN)
                 # -----------------------------------------------------------------
@@ -490,9 +503,17 @@ with tab_analysis:
                         title=t["heat_title"].format(param=param_mode, station=selected_stesen, year=chosen_year)
                     )
                     fig_heat.update_layout(height=580, margin=dict(l=20, r=20, t=40, b=20))
-                    st.plotly_chart(fig_heat, use_container_width=True)
+                    st.plotly_chart(fig_heat, use_container_width=True, config=fig_config)
                     
-                    # Kotak Penerangan Auto-Insight
+                    # Butang Muat Turun HTML
+                    html_heat = fig_heat.to_html(include_plotlyjs='cdn').encode('utf-8')
+                    st.download_button(
+                        label=t["download_chart_html"].format(chart="Heatmap"),
+                        data=html_heat,
+                        file_name=f"Heatmap_{param_mode}_{selected_stesen}_{chosen_year}.html",
+                        mime="text/html"
+                    )
+                    
                     max_day_val = df_heat['Value_Numeric'].max()
                     max_day_date = df_heat.loc[df_heat['Value_Numeric'].idxmax()] if pd.notna(max_day_val) else None
                     date_str = f"{int(max_day_date['Day'])}/{int(max_day_date['Month'])}/{chosen_year}" if max_day_date is not None else "-"
@@ -527,7 +548,16 @@ with tab_analysis:
                     )
                     fig_trend.add_hline(y=mean_val, line_dash="dash", line_color="red", annotation_text=f"{t['trend_avg_label']}: {mean_val:.1f} {unit_str}")
                     fig_trend.update_layout(margin=dict(l=20, r=20, t=40, b=20))
-                    st.plotly_chart(fig_trend, use_container_width=True)
+                    st.plotly_chart(fig_trend, use_container_width=True, config=fig_config)
+                    
+                    # Butang Muat Turun HTML
+                    html_trend = fig_trend.to_html(include_plotlyjs='cdn').encode('utf-8')
+                    st.download_button(
+                        label=t["download_chart_html"].format(chart="Trend"),
+                        data=html_trend,
+                        file_name=f"Trend_{param_mode}_{selected_stesen}.html",
+                        mime="text/html"
+                    )
                     
                     st.info(f"""
                     📌 **Penerangan Trend Siri Masa ({min_yr}–{max_yr}):**
@@ -541,14 +571,10 @@ with tab_analysis:
                 # -----------------------------------------------------------------
                 elif chart_choice == "Normals_Range":
                     month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-                    
-                    # Kira statistik bulanan: Purata, Minimum, dan Maksimum
                     month_stats = df_stesen.groupby('Month')['Value_Numeric'].agg(['mean', 'min', 'max']).reset_index()
                     month_stats['Month_Name'] = month_stats['Month'].apply(lambda x: month_names[x-1])
                     
                     fig_range = go.Figure()
-                    
-                    # 1. Jalur Julat Maksimum (Upper bound)
                     fig_range.add_trace(go.Scatter(
                         x=month_stats['Month_Name'],
                         y=month_stats['max'],
@@ -557,8 +583,6 @@ with tab_analysis:
                         showlegend=False,
                         hoverinfo='skip'
                     ))
-                    
-                    # 2. Jalur Julat Minimum (Lower bound dengan Shaded Ribbon)
                     fig_range.add_trace(go.Scatter(
                         x=month_stats['Month_Name'],
                         y=month_stats['min'],
@@ -570,7 +594,6 @@ with tab_analysis:
                         hovertemplate='Julat Minimum: %{y:.1f}' + f' {unit_str}<extra></extra>'
                     ))
                     
-                    # 3. Garisan Purata Normal (Mean Line)
                     main_line_color = '#1f77b4' if param_mode == 'Rainfall' else '#d62728'
                     fig_range.add_trace(go.Scatter(
                         x=month_stats['Month_Name'],
@@ -589,7 +612,16 @@ with tab_analysis:
                         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
                         margin=dict(l=20, r=20, t=50, b=20)
                     )
-                    st.plotly_chart(fig_range, use_container_width=True)
+                    st.plotly_chart(fig_range, use_container_width=True, config=fig_config)
+                    
+                    # Butang Muat Turun HTML
+                    html_range = fig_range.to_html(include_plotlyjs='cdn').encode('utf-8')
+                    st.download_button(
+                        label=t["download_chart_html"].format(chart="Normals_Range"),
+                        data=html_range,
+                        file_name=f"Normals_Range_{param_mode}_{selected_stesen}.html",
+                        mime="text/html"
+                    )
                     
                     peak_m = month_stats.loc[month_stats['mean'].idxmax()]
                     dry_m = month_stats.loc[month_stats['mean'].idxmin()]
@@ -631,7 +663,16 @@ with tab_analysis:
                     )
                     fig_anom.add_hline(y=0, line_color="black", line_width=1.5)
                     fig_anom.update_layout(margin=dict(l=20, r=20, t=40, b=20))
-                    st.plotly_chart(fig_anom, use_container_width=True)
+                    st.plotly_chart(fig_anom, use_container_width=True, config=fig_config)
+                    
+                    # Butang Muat Turun HTML
+                    html_anom = fig_anom.to_html(include_plotlyjs='cdn').encode('utf-8')
+                    st.download_button(
+                        label=t["download_chart_html"].format(chart="Anomaly"),
+                        data=html_anom,
+                        file_name=f"Anomaly_{param_mode}_{selected_stesen}.html",
+                        mime="text/html"
+                    )
                     
                     highest_anom = annual_df.loc[annual_df['Anomaly'].idxmax()]
                     lowest_anom = annual_df.loc[annual_df['Anomaly'].idxmin()]
