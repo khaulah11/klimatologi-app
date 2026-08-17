@@ -7,7 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # ---------------------------------------------------------
-# 1. TETAPAN HALAMAN
+# 1. TETAPAN HALAMAN & TEMA
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="MetMalaysia Climatology System",
@@ -28,39 +28,37 @@ TEXTS = {
         "manual_header": "📖 Manual Penggunaan & Rujukan",
         "manual_desc": """
         **Panduan Ringkas Penggunaan:**
-        1. **Muat Naik Fail:** Masukkan fail raw AAWS (`.xls` / `.xlsx`) di menu bar sisi kiri.
-        2. **Pilih Parameter:** Gunakan toggle untuk bertukar antara **Hujan (*Rainfall*)** dan **Suhu (*Temperature*)**.
-        3. **Penapisan WMO:** Semakan integriti data hilang (`NA`) automatik mengikut garis panduan **WMO-No. 1203**.
-        4. **Eksport Borang & Graf:** Jana borang rekod Excel atau muat turun fail graf interaktif (`.HTML`).
+        1. **Muat Naik Fail:** Masukkan fail raw AAWS (`.xls` / `.xlsx`) di menu bar sisi.
+        2. **Pilih Parameter:** Gunakan butang di Zon Kawalan untuk bertukar antara **Hujan** dan **Suhu**.
+        3. **Audit WMO:** Semakan integriti data hilang (`NA`) automatik mengikut panduan **WMO-No. 1203**.
+        4. **Eksport Data & Visual:** Jana borang Excel piawai atau muat turun graf `.HTML` interaktif.
         """,
         "btn_download_wmo": "📥 Muat Turun WMO-No. 1203 (PDF)",
         "upload_label": "Muat naik fail siri masa AAWS (.xls / .xlsx)",
-        "upload_success": "✅ {count} fail siri masa sedia diproses.",
         "qc_mode_label": "⚙️ Piawaian Data Hilang (WMO):",
-        "stations_ready": "{count} Stesen Dikesan",
         "download_zip": "📦 Muat Turun Semua ({param}) [.ZIP]",
         "zip_filename": "Laporan_Klimatologi_{param}_Semua_Stesen.zip",
-        "select_param": "Pilih Parameter Cerapan:",
+        "select_param": "Parameter Cerapan:",
         "param_rain": "🌧️ Hujan (Rainfall)",
         "param_temp": "🌡️ Suhu Udara (Temperature)",
-        "no_param_data": "⚠️ **Tiada data {param_name} dikesan dalam fail yang dimuat naik.** Parameter dikesan dalam fail semasa: **{detected_params}**. Sila tukar pilihan toggle atau muat naik fail yang sepadan.",
+        "no_param_data": "⚠️ **Tiada data {param_name} dikesan.** Parameter dikesan dalam fail: **{detected_params}**. Sila tukar pilihan atau muat naik fail yang sepadan.",
         "select_station": "Pilih Stesen:",
-        "station_name": "Stesen",
-        "record_period": "Tempoh Rekod",
-        "completeness_rate": "Kesempurnaan Data",
-        "invalid_months": "Bulan Tidak Lengkap",
-        "alert_incomplete": "⚠️ **Perhatian Pegawai:** Terdapat **{count} bulan** tidak memenuhi piawaian kesempurnaan data ({rule}). Nilai bagi bulan berkenaan ditandakan secara automatik sebagai `N.A (Incomplete)`.",
-        "subtab_form": "📄 Borang Rekod Piawai & Muat Turun",
+        "station_name": "Stesen Cerapan",
+        "record_period": "Tempoh Siri Masa",
+        "completeness_rate": "Tahap Kesempurnaan",
+        "invalid_months": "Status Integriti Bulanan",
+        "alert_incomplete": "⚠️ **Perhatian Pegawai:** Terdapat **{count} bulan** tidak memenuhi piawaian kesempurnaan data ({rule}). Nilai bagi bulan berkenaan ditandakan sebagai `N.A (Incomplete)`.",
+        "subtab_form": "📄 Borang Rekod Piawai & Eksport",
         "subtab_charts": "📈 Visualisasi Data & Analisis Julat",
         "download_excel": "📥 Muat Turun Excel ({station})",
         "download_chart_html": "📥 Muat Turun Graf Interaktif ({chart}) [.HTML]",
-        "plot_type": "Pilih Jenis Graf:",
-        "color_theme": "Skim Warna:",
+        "plot_type": "Pilih Perspektif Visual:",
+        "color_theme": "Skim Warna Graf:",
         "opt_heatmap": "🌧️ Matriks Harian (Heatmap)",
         "opt_trend": "📈 Trend Siri Masa Tahunan",
         "opt_normals": "📊 Profil Normal Bulanan & Julat Min-Maks (Range Envelope)",
         "opt_anomaly": "📉 Anomali Iklim Siri Masa (Climate Anomaly)",
-        "select_year_heat": "Pilih Tahun:",
+        "select_year_heat": "Pilih Tahun Kalendar:",
         "heat_title": "Matriks Harian {param} — {station} ({year})",
         "axis_month": "Bulan",
         "axis_day": "Hari",
@@ -69,10 +67,10 @@ TEXTS = {
         "trend_avg_label": "Purata Normal",
         "norm_title": "Profil Purata Bulanan & Julat Ekstrem (Min-Max) — {station}",
         "anomaly_title": "Siri Masa Anomali {param} — {station} ({min_yr} - {max_yr})",
-        "axis_control_header": "⚙️ Tetapan & Penyeragaman Skala Paksi (Custom Axis Scaling)",
-        "axis_enable_custom": "Seragamkan / Kunci Skala Paksi Graf (Standardize Axis Range)",
-        "axis_min_label": "Nilai Minimum Paksi:",
-        "axis_max_label": "Nilai Maksimum Paksi:",
+        "axis_control_header": "⚙️ Tetapan Skala Paksi Graf (Custom Axis Range)",
+        "axis_enable_custom": "Seragamkan / Kunci Skala Paksi Graf (Standardize Axis)",
+        "axis_min_label": "Nilai Had Bawah (Min):",
+        "axis_max_label": "Nilai Had Atas (Max):",
         "qc_title": "Log Audit Integriti Data (WMO-No. 1203)",
         "qc_filter_failed": "🔍 Paparkan bulan tidak lengkap / ada data hilang (NA) sahaja",
         "download_qc_csv": "📥 Muat Turun Log Audit (.CSV)",
@@ -105,32 +103,30 @@ TEXTS = {
         """,
         "btn_download_wmo": "📥 Download WMO-No. 1203 (PDF)",
         "upload_label": "Upload AAWS time-series files (.xls / .xlsx)",
-        "upload_success": "✅ {count} time-series file(s) ready for processing.",
         "qc_mode_label": "⚙️ Missing Data Standard (WMO):",
-        "stations_ready": "{count} Station(s) Detected",
         "download_zip": "📦 Download All ({param}) [.ZIP]",
         "zip_filename": "Climatology_Report_{param}_All_Stations.zip",
-        "select_param": "Select Climate Parameter:",
+        "select_param": "Observation Parameter:",
         "param_rain": "🌧️ Rainfall",
         "param_temp": "🌡️ Air Temperature",
-        "no_param_data": "⚠️ **No {param_name} data detected in the uploaded file(s).** Detected parameter in current dataset: **{detected_params}**. Please switch toggle or upload matching data.",
+        "no_param_data": "⚠️ **No {param_name} data detected.** Detected parameter in file: **{detected_params}**. Please switch toggle or upload matching data.",
         "select_station": "Select Station:",
-        "station_name": "Station",
-        "record_period": "Record Period",
-        "completeness_rate": "Data Completeness",
-        "invalid_months": "Incomplete Months",
+        "station_name": "Observation Station",
+        "record_period": "Time-Series Period",
+        "completeness_rate": "Completeness Level",
+        "invalid_months": "Monthly Integrity Status",
         "alert_incomplete": "⚠️ **Officer Advisory:** There are **{count} month(s)** failing completeness standards ({rule}). Values are flagged as `N.A (Incomplete)`.",
-        "subtab_form": "📄 Standard Sheets & Download",
+        "subtab_form": "📄 Standard Sheets & Export",
         "subtab_charts": "📈 Interactive Visuals & Range Analytics",
         "download_excel": "📥 Download Excel ({station})",
         "download_chart_html": "📥 Download Interactive Chart ({chart}) [.HTML]",
-        "plot_type": "Select Chart Type:",
-        "color_theme": "Color Theme:",
+        "plot_type": "Select Visual Perspective:",
+        "color_theme": "Chart Color Theme:",
         "opt_heatmap": "🌧️ Daily Matrix (Heatmap)",
         "opt_trend": "📈 Annual Time-Series Trend",
         "opt_normals": "📊 Monthly Normals & Range Envelope (Min-Max)",
         "opt_anomaly": "📉 Time-Series Climate Anomaly",
-        "select_year_heat": "Select Year:",
+        "select_year_heat": "Select Calendar Year:",
         "heat_title": "Daily Matrix for {param} — {station} ({year})",
         "axis_month": "Month",
         "axis_day": "Day",
@@ -141,8 +137,8 @@ TEXTS = {
         "anomaly_title": "{param} Anomaly Time-Series — {station} ({min_yr} - {max_yr})",
         "axis_control_header": "⚙️ Custom Axis Scaling & Standardization",
         "axis_enable_custom": "Standardize / Lock Graph Axis Range",
-        "axis_min_label": "Axis Minimum Value:",
-        "axis_max_label": "Axis Maximum Value:",
+        "axis_min_label": "Lower Bound (Min):",
+        "axis_max_label": "Upper Bound (Max):",
         "qc_title": "Data Integrity Audit Log (WMO-No. 1203)",
         "qc_filter_failed": "🔍 Show incomplete / missing data months only",
         "download_qc_csv": "📥 Download Audit Log (.CSV)",
@@ -162,7 +158,7 @@ TEXTS = {
 }
 
 # ---------------------------------------------------------
-# 3. SIDEBAR: KAWALAN, MANUAL PENGGUNAAN & FAIL
+# 3. SIDEBAR: KAWALAN PENGGUNA & FAIL
 # ---------------------------------------------------------
 with st.sidebar:
     selected_lang = st.selectbox("🌐 Bahasa / Language", options=["Bahasa Melayu", "English"])
@@ -181,7 +177,7 @@ with st.sidebar:
                 mime="application/pdf",
                 use_container_width=True
             )
-        except:
+        except Exception:
             st.caption("ℹ️ Fail rujukan WMO-No. 1203 sedia ada.")
             
     st.divider()
@@ -200,13 +196,13 @@ with st.sidebar:
     )
 
 # ---------------------------------------------------------
-# 4. PENGEPALA MINIMALIS
+# 4. PENGEPALA APLIKASI
 # ---------------------------------------------------------
 header_col1, header_col2 = st.columns([1.1, 6])
 with header_col1:
     try:
-        st.image("logo_met.png", width=140)
-    except:
+        st.image("logo_met.png", width=135)
+    except Exception:
         st.write("🌤️")
 
 with header_col2:
@@ -216,16 +212,14 @@ with header_col2:
 st.divider()
 
 # ---------------------------------------------------------
-# 5. FUNGSI PEMPROSESAN DATA DENGAN PENGECAMAN KETAT
+# 5. ENJIN PEMPROSESAN DATA & WMO
 # ---------------------------------------------------------
 def detect_parameter_type(header_text):
     text_lower = header_text.lower()
     temp_keywords = ['temperature', 'suhu', 'temp', 'celsius', '°c', 'deg c', 'degc']
     rain_keywords = ['rainfall', 'hujan', 'rain', 'presipitasi', 'rf', 'mm']
-    
     is_temp = any(k in text_lower for k in temp_keywords)
     is_rain = any(k in text_lower for k in rain_keywords)
-    
     if is_temp and not is_rain:
         return "Temperature"
     elif is_rain and not is_temp:
@@ -235,11 +229,7 @@ def detect_parameter_type(header_text):
     return "Rainfall"
 
 def process_multiple_aaws_files(files_list):
-    all_data = {
-        "Rainfall": {},
-        "Temperature": {}
-    }
-    
+    all_data = {"Rainfall": {}, "Temperature": {}}
     for file in files_list:
         try:
             xls = pd.ExcelFile(file)
@@ -247,7 +237,6 @@ def process_multiple_aaws_files(files_list):
                 if sheet.lower() == 'datalist':
                     continue
                 df = pd.read_excel(xls, sheet_name=sheet)
-                
                 header_dump = " ".join([str(val) for val in df.iloc[:11, :].values.flatten()])
                 detected_param = detect_parameter_type(header_dump)
                 
@@ -303,8 +292,7 @@ def generate_qc_audit_table(df_station, rule, t_dict):
     month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
     for yr in sorted(df_station['Year'].unique()):
         df_yr = df_station[df_station['Year'] == yr]
-        pivot_num = df_yr.pivot(index='Day', columns='Month', values='Value_Numeric')
-        pivot_num = pivot_num.reindex(index=range(1, 32), columns=range(1, 13))
+        pivot_num = df_yr.pivot(index='Day', columns='Month', values='Value_Numeric').reindex(index=range(1, 32), columns=range(1, 13))
         for m in range(1, 13):
             col_data = pivot_num[m]
             is_valid, miss_cnt, max_consec = evaluate_month_qc(col_data, rule)
@@ -387,24 +375,32 @@ if uploaded_files:
     all_data = process_multiple_aaws_files(uploaded_files)
 
 # ---------------------------------------------------------
-# 6. TAB NAVIGASI UTAMA
+# 6. TAB NAVIGASI KERJA
 # ---------------------------------------------------------
 tab_analysis, tab_qc = st.tabs([
     t["nav_analysis"], 
     t["nav_qc"]
 ])
 
-# === TAB 1: ANALISIS PARAMETER ===
+# =========================================================
+# TAB 1: ANALISIS PARAMETER (3-ZON LINEAR ARCHITECTURE)
+# =========================================================
 with tab_analysis:
     if uploaded_files:
-        chosen_param_label = st.radio(
-            t["select_param"],
-            options=[t["param_rain"], t["param_temp"]],
-            horizontal=True
-        )
-        param_mode = "Rainfall" if chosen_param_label == t["param_rain"] else "Temperature"
-        unit_str = "mm" if param_mode == "Rainfall" else "°C"
+        # -------------------------------------------------
+        # ZON 1: KAWALAN UTAMA (CONTROL BAR)
+        # -------------------------------------------------
+        ctrl_col1, ctrl_col2, ctrl_col3 = st.columns([1.8, 1.8, 1.4])
         
+        with ctrl_col1:
+            chosen_param_label = st.radio(
+                t["select_param"],
+                options=[t["param_rain"], t["param_temp"]],
+                horizontal=True
+            )
+            param_mode = "Rainfall" if chosen_param_label == t["param_rain"] else "Temperature"
+            unit_str = "mm" if param_mode == "Rainfall" else "°C"
+            
         stations_data = all_data.get(param_mode, {})
         
         if not stations_data:
@@ -412,10 +408,11 @@ with tab_analysis:
             detected_str = ", ".join(detected) if detected else "Tiada"
             st.warning(t["no_param_data"].format(param_name=param_mode, detected_params=detected_str))
         else:
-            col_zip1, col_zip2 = st.columns([3, 1])
-            with col_zip1:
-                st.caption(t["stations_ready"].format(count=len(stations_data)))
-            with col_zip2:
+            with ctrl_col2:
+                selected_stesen = st.selectbox(t["select_station"], options=list(stations_data.keys()))
+                
+            with ctrl_col3:
+                st.write("")  # Alignment spacer
                 zip_buffer = io.BytesIO()
                 with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
                     for st_name, st_df in stations_data.items():
@@ -428,32 +425,38 @@ with tab_analysis:
                     data=zip_buffer,
                     file_name=t["zip_filename"].format(param=param_mode),
                     mime="application/zip",
+                    use_container_width=True,
                     type="primary"
                 )
                 
-            st.divider()
-            
-            selected_stesen = st.selectbox(t["select_station"], options=list(stations_data.keys()))
+            # -------------------------------------------------
+            # ZON 2: METRIK STATUS PANTAS (KPI HERO CARDS)
+            # -------------------------------------------------
             df_stesen = stations_data[selected_stesen]
             min_yr, max_yr = df_stesen['Year'].min(), df_stesen['Year'].max()
-            
             qc_df_station = generate_qc_audit_table(df_stesen, qc_rule, t)
             total_months = len(qc_df_station)
             incomplete_months_count = (qc_df_station[t["qc_col_status"]] == t["qc_status_incomp"]).sum()
             total_missing_days = df_stesen['Value_Numeric'].isna().sum()
             completeness_pct = ((len(df_stesen) - total_missing_days) / len(df_stesen)) * 100
             
-            m1, m2, m3, m4 = st.columns(4)
-            m1.metric(t["station_name"], selected_stesen)
-            m2.metric(t["record_period"], f"{min_yr} - {max_yr}")
-            m3.metric(t["completeness_rate"], f"{completeness_pct:.1f}%")
-            m4.metric(t["invalid_months"], f"{incomplete_months_count} / {total_months}")
-            
+            kpi_box = st.container(border=True)
+            with kpi_box:
+                m1, m2, m3, m4 = st.columns(4)
+                m1.metric(t["station_name"], selected_stesen)
+                m2.metric(t["record_period"], f"{min_yr} – {max_yr}")
+                m3.metric(t["completeness_rate"], f"{completeness_pct:.1f}%")
+                m4.metric(t["invalid_months"], f"{incomplete_months_count} / {total_months} Incomplete")
+                
             if incomplete_months_count > 0:
                 st.warning(t["alert_incomplete"].format(count=incomplete_months_count, rule=qc_rule))
                 
+            # -------------------------------------------------
+            # ZON 3: RUANG KERJA UTAMA (DUAL-VIEW WORKSPACE)
+            # -------------------------------------------------
             sub_form, sub_plots = st.tabs([t["subtab_form"], t["subtab_charts"]])
             
+            # SUB-VIEW 1: BORANG EXCEL
             with sub_form:
                 excel_file = generate_excel_for_station(selected_stesen, df_stesen, qc_rule, param_mode)
                 clean_st_name = "".join([c for c in selected_stesen if c.isalnum() or c in (' ', '_', '-')]).strip()
@@ -465,24 +468,24 @@ with tab_analysis:
                 )
                 st.dataframe(df_stesen.head(15), use_container_width=True)
                 
+            # SUB-VIEW 2: VISUALISASI DATA & ANALISIS JULAT
             with sub_plots:
-                ctrl_col1, ctrl_col2 = st.columns(2)
+                # Kawalan Pilihan Visual & Skim Warna
+                plot_ctrl1, plot_ctrl2 = st.columns([2, 1.2])
                 chart_options_map = {
-                    t["opt_heatmap"]: "Heatmap",
-                    t["opt_trend"]: "Trend",
                     t["opt_normals"]: "Normals_Range",
-                    t["opt_anomaly"]: "Anomaly"
+                    t["opt_anomaly"]: "Anomaly",
+                    t["opt_trend"]: "Trend",
+                    t["opt_heatmap"]: "Heatmap"
                 }
-                with ctrl_col1:
+                with plot_ctrl1:
                     chart_choice_label = st.selectbox(t["plot_type"], options=list(chart_options_map.keys()))
                     chart_choice = chart_options_map[chart_choice_label]
-                with ctrl_col2:
+                with plot_ctrl2:
                     default_idx = 0 if param_mode == "Rainfall" else 1
                     color_choice = st.selectbox(t["color_theme"], options=["Blues", "Thermal", "Viridis", "YlGnBu", "Spectral", "Plasma", "Teal"], index=default_idx)
                     
-                # -----------------------------------------------------------------
-                # PANEL KAWALAN SKALA PAKSI TERSUAI (STANDARDIZE AXIS)
-                # -----------------------------------------------------------------
+                # Kawalan Skala Paksi Tersuai
                 with st.expander(t["axis_control_header"], expanded=False):
                     use_custom_axis = st.checkbox(t["axis_enable_custom"], value=False)
                     if use_custom_axis:
@@ -510,51 +513,108 @@ with tab_analysis:
                     }
                 }
                 
-                # -----------------------------------------------------------------
-                # 1. HEATMAP (MATRIKS KEAMATAN HARIAN)
-                # -----------------------------------------------------------------
-                if chart_choice == "Heatmap":
-                    years_list = sorted(df_stesen['Year'].unique())
-                    chosen_year = st.selectbox(t["select_year_heat"], options=years_list, index=len(years_list)-1)
-                    df_heat = df_stesen[df_stesen['Year'] == chosen_year]
-                    heat_pivot = df_heat.pivot(index='Day', columns='Month', values='Value_Numeric').reindex(index=range(1, 32), columns=range(1, 13))
-                    month_labels = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+                # KANVAS 1: PROFIL NORMAL & CARTA JULAT (RIBBON ENVELOPE)
+                if chart_choice == "Normals_Range":
+                    month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+                    month_stats = df_stesen.groupby('Month')['Value_Numeric'].agg(['mean', 'min', 'max']).reset_index()
+                    month_stats['Month_Name'] = month_stats['Month'].apply(lambda x: month_names[x-1])
                     
-                    fig_heat = px.imshow(
-                        heat_pivot,
-                        labels=dict(x=t["axis_month"], y=t["axis_day"], color=f"{param_mode} ({unit_str})"),
-                        x=month_labels,
-                        y=[str(d) for d in range(1, 32)],
-                        color_continuous_scale=color_choice,
-                        aspect="auto",
-                        range_color=[axis_min_val, axis_max_val] if use_custom_axis else None,
-                        title=t["heat_title"].format(param=param_mode, station=selected_stesen, year=chosen_year)
+                    fig_range = go.Figure()
+                    fig_range.add_trace(go.Scatter(
+                        x=month_stats['Month_Name'], y=month_stats['max'],
+                        mode='lines', line=dict(width=0), showlegend=False, hoverinfo='skip'
+                    ))
+                    fig_range.add_trace(go.Scatter(
+                        x=month_stats['Month_Name'], y=month_stats['min'],
+                        mode='lines', line=dict(width=0), fill='tonexty',
+                        fillcolor='rgba(31, 119, 180, 0.2)' if param_mode == 'Rainfall' else 'rgba(214, 39, 40, 0.2)',
+                        name='Julat Ekstrem (Min-Max Range)',
+                        hovertemplate='Julat Minimum: %{y:.1f}' + f' {unit_str}<extra></extra>'
+                    ))
+                    main_line_color = '#1f77b4' if param_mode == 'Rainfall' else '#d62728'
+                    fig_range.add_trace(go.Scatter(
+                        x=month_stats['Month_Name'], y=month_stats['mean'],
+                        mode='lines+markers', name=f'Purata Normal ({param_mode})',
+                        line=dict(color=main_line_color, width=3), marker=dict(size=8),
+                        hovertemplate='Bulan: %{x}<br>Purata: %{y:.1f}' + f' {unit_str}<extra></extra>'
+                    ))
+                    fig_range.update_layout(
+                        title=t["norm_title"].format(param=param_mode, station=selected_stesen),
+                        xaxis_title=t["axis_month"], yaxis_title=f"{param_mode} ({unit_str})",
+                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                        margin=dict(l=20, r=20, t=50, b=20)
                     )
-                    fig_heat.update_layout(height=580, margin=dict(l=20, r=20, t=40, b=20))
-                    st.plotly_chart(fig_heat, use_container_width=True, config=fig_config)
+                    if use_custom_axis:
+                        fig_range.update_layout(yaxis_range=[axis_min_val, axis_max_val])
+                        
+                    st.plotly_chart(fig_range, use_container_width=True, config=fig_config)
                     
-                    html_heat = fig_heat.to_html(include_plotlyjs='cdn').encode('utf-8')
+                    html_range = fig_range.to_html(include_plotlyjs='cdn').encode('utf-8')
                     st.download_button(
-                        label=t["download_chart_html"].format(chart="Heatmap"),
-                        data=html_heat,
-                        file_name=f"Heatmap_{param_mode}_{selected_stesen}_{chosen_year}.html",
+                        label=t["download_chart_html"].format(chart="Normals_Range"),
+                        data=html_range,
+                        file_name=f"Normals_Range_{param_mode}_{selected_stesen}.html",
                         mime="text/html"
                     )
                     
-                    max_day_val = df_heat['Value_Numeric'].max()
-                    max_day_date = df_heat.loc[df_heat['Value_Numeric'].idxmax()] if pd.notna(max_day_val) else None
-                    date_str = f"{int(max_day_date['Day'])}/{int(max_day_date['Month'])}/{chosen_year}" if max_day_date is not None else "-"
+                    peak_m = month_stats.loc[month_stats['mean'].idxmax()]
+                    dry_m = month_stats.loc[month_stats['mean'].idxmin()]
                     
                     st.info(f"""
-                    📌 **Penerangan Matriks Harian ({chosen_year}):**
-                    * Graf ini memaparkan corak keamatan harian sepanjang 12 bulan. Petak berwarna lebih gelap menandakan bacaan yang lebih tinggi.
-                    * **Bacaan Harian Tertinggi:** `{max_day_val:.1f} {unit_str}` dicatatkan pada tarikh **{date_str}**.
-                    * Petak kosong/putih menunjukkan hari tanpa cerapan hujan atau suhu minimum.
+                    📌 **Rumusan Profil Bulanan & Carta Julat (Min–Maks):**
+                    * **Kawasan Berlorek (Ribbon):** Menunjukkan julat variabiliti antara bacaan minimum dan maksimum yang pernah direkodkan bagi setiap bulan sepanjang siri masa.
+                    * **Bulan Kemuncak (Peak Month):** Bulan **{peak_m['Month_Name']}** dengan purata tertinggi `{peak_m['mean']:.1f} {unit_str}` (Maks: `{peak_m['max']:.1f} {unit_str}`).
+                    * **Bulan Terendah:** Bulan **{dry_m['Month_Name']}** dengan purata `{dry_m['mean']:.1f} {unit_str}` (Min: `{dry_m['min']:.1f} {unit_str}`).
                     """)
                     
-                # -----------------------------------------------------------------
-                # 2. TREND SIRI MASA TAHUNAN
-                # -----------------------------------------------------------------
+                # KANVAS 2: ANOMALI IKLIM (DIVERGING BAR)
+                elif chart_choice == "Anomaly":
+                    if param_mode == "Rainfall":
+                        annual_df = df_stesen.groupby('Year')['Value_Numeric'].sum().reset_index()
+                    else:
+                        annual_df = df_stesen.groupby('Year')['Value_Numeric'].mean().reset_index()
+                        
+                    norm_mean = annual_df['Value_Numeric'].mean()
+                    annual_df['Anomaly'] = annual_df['Value_Numeric'] - norm_mean
+                    
+                    if param_mode == "Rainfall":
+                        annual_df['Status'] = annual_df['Anomaly'].apply(lambda x: 'Lebih Normal (Wet)' if x >= 0 else 'Kurang Normal (Dry)')
+                        color_map = {'Lebih Normal (Wet)': '#1f77b4', 'Kurang Normal (Dry)': '#d62728'}
+                    else:
+                        annual_df['Status'] = annual_df['Anomaly'].apply(lambda x: 'Lebih Panas (Warm)' if x >= 0 else 'Lebih Sejuk (Cool)')
+                        color_map = {'Lebih Panas (Warm)': '#d62728', 'Lebih Sejuk (Cool)': '#1f77b4'}
+                    
+                    fig_anom = px.bar(
+                        annual_df, x='Year', y='Anomaly', color='Status',
+                        color_discrete_map=color_map,
+                        labels={'Anomaly': f'Anomali ({unit_str})', 'Year': t['axis_year']},
+                        title=t["anomaly_title"].format(param=param_mode, station=selected_stesen, min_yr=min_yr, max_yr=max_yr)
+                    )
+                    fig_anom.add_hline(y=0, line_color="black", line_width=1.5)
+                    if use_custom_axis:
+                        fig_anom.update_layout(yaxis_range=[axis_min_val, axis_max_val])
+                    fig_anom.update_layout(margin=dict(l=20, r=20, t=40, b=20))
+                    st.plotly_chart(fig_anom, use_container_width=True, config=fig_config)
+                    
+                    html_anom = fig_anom.to_html(include_plotlyjs='cdn').encode('utf-8')
+                    st.download_button(
+                        label=t["download_chart_html"].format(chart="Anomaly"),
+                        data=html_anom,
+                        file_name=f"Anomaly_{param_mode}_{selected_stesen}.html",
+                        mime="text/html"
+                    )
+                    
+                    highest_anom = annual_df.loc[annual_df['Anomaly'].idxmax()]
+                    lowest_anom = annual_df.loc[annual_df['Anomaly'].idxmin()]
+                    
+                    st.info(f"""
+                    📌 **Rumusan Anomali Iklim (Rujukan Normal: `{norm_mean:.1f} {unit_str}`):**
+                    * Garisan 0 mewakili purata normal iklim. Bar menunjukkan sisihan (*departure*) daripada purata jangka panjang.
+                    * **Anomali Positif Tertinggi:** Tahun **{int(highest_anom['Year'])}** (`+{highest_anom['Anomaly']:.1f} {unit_str}`).
+                    * **Anomali Negatif Terendah:** Tahun **{int(lowest_anom['Year'])}** (`{lowest_anom['Anomaly']:.1f} {unit_str}`).
+                    """)
+                    
+                # KANVAS 3: TREND SIRI MASA TAHUNAN
                 elif chart_choice == "Trend":
                     if param_mode == "Rainfall":
                         annual_df = df_stesen.groupby('Year')['Value_Numeric'].sum().reset_index()
@@ -574,10 +634,8 @@ with tab_analysis:
                         title=t["trend_title"].format(param=param_mode, station=selected_stesen, min_yr=min_yr, max_yr=max_yr)
                     )
                     fig_trend.add_hline(y=mean_val, line_dash="dash", line_color="red", annotation_text=f"{t['trend_avg_label']}: {mean_val:.1f} {unit_str}")
-                    
                     if use_custom_axis:
                         fig_trend.update_layout(yaxis_range=[axis_min_val, axis_max_val])
-                        
                     fig_trend.update_layout(margin=dict(l=20, r=20, t=40, b=20))
                     st.plotly_chart(fig_trend, use_container_width=True, config=fig_config)
                     
@@ -590,139 +648,55 @@ with tab_analysis:
                     )
                     
                     st.info(f"""
-                    📌 **Penerangan Trend Siri Masa ({min_yr}–{max_yr}):**
+                    📌 **Rumusan Trend Siri Masa ({min_yr}–{max_yr}):**
                     * **Purata Normal Jangka Panjang:** `{mean_val:.1f} {unit_str}` (garisan putus merah).
-                    * **Tahun Tertinggi / Paling Ekstrem:** Tahun **{int(max_yr_row['Year'])}** dengan nilai `{max_yr_row['Value_Numeric']:.1f} {unit_str}`.
+                    * **Tahun Tertinggi / Ekstrem:** Tahun **{int(max_yr_row['Year'])}** dengan nilai `{max_yr_row['Value_Numeric']:.1f} {unit_str}`.
                     * **Tahun Terendah:** Tahun **{int(min_yr_row['Year'])}** dengan nilai `{min_yr_row['Value_Numeric']:.1f} {unit_str}`.
                     """)
                     
-                # -----------------------------------------------------------------
-                # 3. PROFIL NORMAL BULANAN & CARTA JULAT (RANGE ENVELOPE)
-                # -----------------------------------------------------------------
-                elif chart_choice == "Normals_Range":
-                    month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-                    month_stats = df_stesen.groupby('Month')['Value_Numeric'].agg(['mean', 'min', 'max']).reset_index()
-                    month_stats['Month_Name'] = month_stats['Month'].apply(lambda x: month_names[x-1])
+                # KANVAS 4: MATRIKS KEAMATAN HARIAN (HEATMAP)
+                elif chart_choice == "Heatmap":
+                    years_list = sorted(df_stesen['Year'].unique())
+                    chosen_year = st.selectbox(t["select_year_heat"], options=years_list, index=len(years_list)-1)
+                    df_heat = df_stesen[df_stesen['Year'] == chosen_year]
+                    heat_pivot = df_heat.pivot(index='Day', columns='Month', values='Value_Numeric').reindex(index=range(1, 32), columns=range(1, 13))
+                    month_labels = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
                     
-                    fig_range = go.Figure()
-                    fig_range.add_trace(go.Scatter(
-                        x=month_stats['Month_Name'],
-                        y=month_stats['max'],
-                        mode='lines',
-                        line=dict(width=0),
-                        showlegend=False,
-                        hoverinfo='skip'
-                    ))
-                    fig_range.add_trace(go.Scatter(
-                        x=month_stats['Month_Name'],
-                        y=month_stats['min'],
-                        mode='lines',
-                        line=dict(width=0),
-                        fill='tonexty',
-                        fillcolor='rgba(31, 119, 180, 0.2)' if param_mode == 'Rainfall' else 'rgba(214, 39, 40, 0.2)',
-                        name='Julat Ekstrem (Min-Max Range)',
-                        hovertemplate='Julat Minimum: %{y:.1f}' + f' {unit_str}<extra></extra>'
-                    ))
-                    
-                    main_line_color = '#1f77b4' if param_mode == 'Rainfall' else '#d62728'
-                    fig_range.add_trace(go.Scatter(
-                        x=month_stats['Month_Name'],
-                        y=month_stats['mean'],
-                        mode='lines+markers',
-                        name=f'Purata Normal ({param_mode})',
-                        line=dict(color=main_line_color, width=3),
-                        marker=dict(size=8),
-                        hovertemplate='Bulan: %{x}<br>Purata: %{y:.1f}' + f' {unit_str}<extra></extra>'
-                    ))
-                    
-                    fig_range.update_layout(
-                        title=t["norm_title"].format(param=param_mode, station=selected_stesen),
-                        xaxis_title=t["axis_month"],
-                        yaxis_title=f"{param_mode} ({unit_str})",
-                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                        margin=dict(l=20, r=20, t=50, b=20)
+                    fig_heat = px.imshow(
+                        heat_pivot,
+                        labels=dict(x=t["axis_month"], y=t["axis_day"], color=f"{param_mode} ({unit_str})"),
+                        x=month_labels, y=[str(d) for d in range(1, 32)],
+                        color_continuous_scale=color_choice, aspect="auto",
+                        range_color=[axis_min_val, axis_max_val] if use_custom_axis else None,
+                        title=t["heat_title"].format(param=param_mode, station=selected_stesen, year=chosen_year)
                     )
+                    fig_heat.update_layout(height=580, margin=dict(l=20, r=20, t=40, b=20))
+                    st.plotly_chart(fig_heat, use_container_width=True, config=fig_config)
                     
-                    if use_custom_axis:
-                        fig_range.update_layout(yaxis_range=[axis_min_val, axis_max_val])
-                        
-                    st.plotly_chart(fig_range, use_container_width=True, config=fig_config)
-                    
-                    html_range = fig_range.to_html(include_plotlyjs='cdn').encode('utf-8')
+                    html_heat = fig_heat.to_html(include_plotlyjs='cdn').encode('utf-8')
                     st.download_button(
-                        label=t["download_chart_html"].format(chart="Normals_Range"),
-                        data=html_range,
-                        file_name=f"Normals_Range_{param_mode}_{selected_stesen}.html",
+                        label=t["download_chart_html"].format(chart="Heatmap"),
+                        data=html_heat,
+                        file_name=f"Heatmap_{param_mode}_{selected_stesen}_{chosen_year}.html",
                         mime="text/html"
                     )
                     
-                    peak_m = month_stats.loc[month_stats['mean'].idxmax()]
-                    dry_m = month_stats.loc[month_stats['mean'].idxmin()]
+                    max_day_val = df_heat['Value_Numeric'].max()
+                    max_day_date = df_heat.loc[df_heat['Value_Numeric'].idxmax()] if pd.notna(max_day_val) else None
+                    date_str = f"{int(max_day_date['Day'])}/{int(max_day_date['Month'])}/{chosen_year}" if max_day_date is not None else "-"
                     
                     st.info(f"""
-                    📌 **Penerangan Profil Bulanan & Carta Julat (Min–Maks):**
-                    * **Kawasan Berlorek (Ribbon):** Menunjukkan julat variabiliti antara bacaan minimum dan maksimum yang pernah direkodkan bagi setiap bulan sepanjang siri masa.
-                    * **Bulan Kemuncak (Peak Month):** Bulan **{peak_m['Month_Name']}** dengan purata tertinggi `{peak_m['mean']:.1f} {unit_str}` (Maks: `{peak_m['max']:.1f} {unit_str}`).
-                    * **Bulan Terendah:** Bulan **{dry_m['Month_Name']}** dengan purata `{dry_m['mean']:.1f} {unit_str}` (Min: `{dry_m['min']:.1f} {unit_str}`).
-                    """)
-                    
-                # -----------------------------------------------------------------
-                # 4. CARTA ANOMALI IKLIM SIRI MASA (DIVERGING BAR)
-                # -----------------------------------------------------------------
-                elif chart_choice == "Anomaly":
-                    if param_mode == "Rainfall":
-                        annual_df = df_stesen.groupby('Year')['Value_Numeric'].sum().reset_index()
-                    else:
-                        annual_df = df_stesen.groupby('Year')['Value_Numeric'].mean().reset_index()
-                        
-                    norm_mean = annual_df['Value_Numeric'].mean()
-                    annual_df['Anomaly'] = annual_df['Value_Numeric'] - norm_mean
-                    
-                    if param_mode == "Rainfall":
-                        annual_df['Status'] = annual_df['Anomaly'].apply(lambda x: 'Lebih Normal (Wet)' if x >= 0 else 'Kurang Normal (Dry)')
-                        color_map = {'Lebih Normal (Wet)': '#1f77b4', 'Kurang Normal (Dry)': '#d62728'}
-                    else:
-                        annual_df['Status'] = annual_df['Anomaly'].apply(lambda x: 'Lebih Panas (Warm)' if x >= 0 else 'Lebih Sejuk (Cool)')
-                        color_map = {'Lebih Panas (Warm)': '#d62728', 'Lebih Sejuk (Cool)': '#1f77b4'}
-                    
-                    fig_anom = px.bar(
-                        annual_df,
-                        x='Year',
-                        y='Anomaly',
-                        color='Status',
-                        color_discrete_map=color_map,
-                        labels={'Anomaly': f'Anomali ({unit_str})', 'Year': t['axis_year']},
-                        title=t["anomaly_title"].format(param=param_mode, station=selected_stesen, min_yr=min_yr, max_yr=max_yr)
-                    )
-                    fig_anom.add_hline(y=0, line_color="black", line_width=1.5)
-                    
-                    if use_custom_axis:
-                        fig_anom.update_layout(yaxis_range=[axis_min_val, axis_max_val])
-                        
-                    fig_anom.update_layout(margin=dict(l=20, r=20, t=40, b=20))
-                    st.plotly_chart(fig_anom, use_container_width=True, config=fig_config)
-                    
-                    html_anom = fig_anom.to_html(include_plotlyjs='cdn').encode('utf-8')
-                    st.download_button(
-                        label=t["download_chart_html"].format(chart="Anomaly"),
-                        data=html_anom,
-                        file_name=f"Anomaly_{param_mode}_{selected_stesen}.html",
-                        mime="text/html"
-                    )
-                    
-                    highest_anom = annual_df.loc[annual_df['Anomaly'].idxmax()]
-                    lowest_anom = annual_df.loc[annual_df['Anomaly'].idxmin()]
-                    
-                    st.info(f"""
-                    📌 **Penerangan Anomali Iklim (Rujukan Normal: `{norm_mean:.1f} {unit_str}`):**
-                    * Garisan 0 mewakili purata normal iklim. Bar menunjukkan sisihan (*departure*) daripada purata jangka panjang.
-                    * **Anomali Positif Tertinggi:** Tahun **{int(highest_anom['Year'])}** (`+{highest_anom['Anomaly']:.1f} {unit_str}`).
-                    * **Anomali Negatif Terendah:** Tahun **{int(lowest_anom['Year'])}** (`{lowest_anom['Anomaly']:.1f} {unit_str}`).
+                    📌 **Rumusan Matriks Harian ({chosen_year}):**
+                    * Graf ini memaparkan corak keamatan harian sepanjang 12 bulan. Petak berwarna lebih gelap menandakan bacaan yang lebih tinggi.
+                    * **Bacaan Harian Tertinggi:** `{max_day_val:.1f} {unit_str}` dicatatkan pada tarikh **{date_str}**.
+                    * Petak kosong/putih menunjukkan hari tanpa cerapan hujan atau suhu minimum.
                     """)
     else:
         st.info(t["info_upload"])
 
-# === TAB 2: SEMAKAN KUALITI & WMO ===
+# =========================================================
+# TAB 2: SEMAKAN KUALITI & WMO AUDIT
+# =========================================================
 with tab_qc:
     st.markdown(f"#### {t['qc_title']}")
     if uploaded_files:
