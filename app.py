@@ -69,6 +69,10 @@ TEXTS = {
         "trend_avg_label": "Purata Normal",
         "norm_title": "Profil Purata Bulanan & Julat Ekstrem (Min-Max) — {station}",
         "anomaly_title": "Siri Masa Anomali {param} — {station} ({min_yr} - {max_yr})",
+        "axis_control_header": "⚙️ Tetapan & Penyeragaman Skala Paksi (Custom Axis Scaling)",
+        "axis_enable_custom": "Seragamkan / Kunci Skala Paksi Graf (Standardize Axis Range)",
+        "axis_min_label": "Nilai Minimum Paksi:",
+        "axis_max_label": "Nilai Maksimum Paksi:",
         "qc_title": "Log Audit Integriti Data (WMO-No. 1203)",
         "qc_filter_failed": "🔍 Paparkan bulan tidak lengkap / ada data hilang (NA) sahaja",
         "download_qc_csv": "📥 Muat Turun Log Audit (.CSV)",
@@ -135,6 +139,10 @@ TEXTS = {
         "trend_avg_label": "Normal Mean",
         "norm_title": "Monthly Average Profile & Range Envelope (Min-Max) — {station}",
         "anomaly_title": "{param} Anomaly Time-Series — {station} ({min_yr} - {max_yr})",
+        "axis_control_header": "⚙️ Custom Axis Scaling & Standardization",
+        "axis_enable_custom": "Standardize / Lock Graph Axis Range",
+        "axis_min_label": "Axis Minimum Value:",
+        "axis_max_label": "Axis Maximum Value:",
         "qc_title": "Data Integrity Audit Log (WMO-No. 1203)",
         "qc_filter_failed": "🔍 Show incomplete / missing data months only",
         "download_qc_csv": "📥 Download Audit Log (.CSV)",
@@ -208,7 +216,7 @@ with header_col2:
 st.divider()
 
 # ---------------------------------------------------------
-# 5. FUNGSI PEMPROSESAN DATA
+# 5. FUNGSI PEMPROSESAN DATA DENGAN PENGECAMAN KETAT
 # ---------------------------------------------------------
 def detect_parameter_type(header_text):
     text_lower = header_text.lower()
@@ -472,7 +480,26 @@ with tab_analysis:
                     default_idx = 0 if param_mode == "Rainfall" else 1
                     color_choice = st.selectbox(t["color_theme"], options=["Blues", "Thermal", "Viridis", "YlGnBu", "Spectral", "Plasma", "Teal"], index=default_idx)
                     
-                # Konfigurasi muat turun imej resolusi tinggi terbina dalam Plotly
+                # -----------------------------------------------------------------
+                # PANEL KAWALAN SKALA PAKSI TERSUAI (STANDARDIZE AXIS)
+                # -----------------------------------------------------------------
+                with st.expander(t["axis_control_header"], expanded=False):
+                    use_custom_axis = st.checkbox(t["axis_enable_custom"], value=False)
+                    if use_custom_axis:
+                        ax_col1, ax_col2 = st.columns(2)
+                        with ax_col1:
+                            axis_min_val = st.number_input(
+                                t["axis_min_label"], 
+                                value=-500.0 if chart_choice == "Anomaly" else (15.0 if param_mode == "Temperature" else 0.0), 
+                                step=10.0 if param_mode == "Rainfall" else 1.0
+                            )
+                        with ax_col2:
+                            axis_max_val = st.number_input(
+                                t["axis_max_label"], 
+                                value=500.0 if chart_choice == "Anomaly" else (3500.0 if param_mode == "Rainfall" else 40.0), 
+                                step=50.0 if param_mode == "Rainfall" else 1.0
+                            )
+                
                 fig_config = {
                     'toImageButtonOptions': {
                         'format': 'png',
@@ -500,12 +527,12 @@ with tab_analysis:
                         y=[str(d) for d in range(1, 32)],
                         color_continuous_scale=color_choice,
                         aspect="auto",
+                        range_color=[axis_min_val, axis_max_val] if use_custom_axis else None,
                         title=t["heat_title"].format(param=param_mode, station=selected_stesen, year=chosen_year)
                     )
                     fig_heat.update_layout(height=580, margin=dict(l=20, r=20, t=40, b=20))
                     st.plotly_chart(fig_heat, use_container_width=True, config=fig_config)
                     
-                    # Butang Muat Turun HTML
                     html_heat = fig_heat.to_html(include_plotlyjs='cdn').encode('utf-8')
                     st.download_button(
                         label=t["download_chart_html"].format(chart="Heatmap"),
@@ -547,10 +574,13 @@ with tab_analysis:
                         title=t["trend_title"].format(param=param_mode, station=selected_stesen, min_yr=min_yr, max_yr=max_yr)
                     )
                     fig_trend.add_hline(y=mean_val, line_dash="dash", line_color="red", annotation_text=f"{t['trend_avg_label']}: {mean_val:.1f} {unit_str}")
+                    
+                    if use_custom_axis:
+                        fig_trend.update_layout(yaxis_range=[axis_min_val, axis_max_val])
+                        
                     fig_trend.update_layout(margin=dict(l=20, r=20, t=40, b=20))
                     st.plotly_chart(fig_trend, use_container_width=True, config=fig_config)
                     
-                    # Butang Muat Turun HTML
                     html_trend = fig_trend.to_html(include_plotlyjs='cdn').encode('utf-8')
                     st.download_button(
                         label=t["download_chart_html"].format(chart="Trend"),
@@ -612,9 +642,12 @@ with tab_analysis:
                         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
                         margin=dict(l=20, r=20, t=50, b=20)
                     )
+                    
+                    if use_custom_axis:
+                        fig_range.update_layout(yaxis_range=[axis_min_val, axis_max_val])
+                        
                     st.plotly_chart(fig_range, use_container_width=True, config=fig_config)
                     
-                    # Butang Muat Turun HTML
                     html_range = fig_range.to_html(include_plotlyjs='cdn').encode('utf-8')
                     st.download_button(
                         label=t["download_chart_html"].format(chart="Normals_Range"),
@@ -662,10 +695,13 @@ with tab_analysis:
                         title=t["anomaly_title"].format(param=param_mode, station=selected_stesen, min_yr=min_yr, max_yr=max_yr)
                     )
                     fig_anom.add_hline(y=0, line_color="black", line_width=1.5)
+                    
+                    if use_custom_axis:
+                        fig_anom.update_layout(yaxis_range=[axis_min_val, axis_max_val])
+                        
                     fig_anom.update_layout(margin=dict(l=20, r=20, t=40, b=20))
                     st.plotly_chart(fig_anom, use_container_width=True, config=fig_config)
                     
-                    # Butang Muat Turun HTML
                     html_anom = fig_anom.to_html(include_plotlyjs='cdn').encode('utf-8')
                     st.download_button(
                         label=t["download_chart_html"].format(chart="Anomaly"),
@@ -679,7 +715,7 @@ with tab_analysis:
                     
                     st.info(f"""
                     📌 **Penerangan Anomali Iklim (Rujukan Normal: `{norm_mean:.1f} {unit_str}`):**
-                    * Garisan $0$ mewakili purata normal iklim. Bar menunjukkan sisihan (*departure*) daripada purata jangka panjang.
+                    * Garisan 0 mewakili purata normal iklim. Bar menunjukkan sisihan (*departure*) daripada purata jangka panjang.
                     * **Anomali Positif Tertinggi:** Tahun **{int(highest_anom['Year'])}** (`+{highest_anom['Anomaly']:.1f} {unit_str}`).
                     * **Anomali Negatif Terendah:** Tahun **{int(lowest_anom['Year'])}** (`{lowest_anom['Anomaly']:.1f} {unit_str}`).
                     """)
