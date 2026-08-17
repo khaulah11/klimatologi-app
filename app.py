@@ -28,10 +28,10 @@ TEXTS = {
         "manual_header": "📖 Manual Penggunaan & Rujukan",
         "manual_desc": """
         **Panduan Ringkas Penggunaan:**
-        1. **Muat Naik Fail:** Masukkan fail raw AAWS (`.xls` / `.xlsx`) di menu bar sisi.
+        1. **Muat Naik Fail:** Masukkan fail raw AAWS (`.xls` / `.xlsx`) di menu bar sisi kiri.
         2. **Pilih Parameter:** Gunakan butang di Zon Kawalan untuk bertukar antara **Hujan** dan **Suhu**.
         3. **Audit WMO:** Semakan integriti data hilang (`NA`) automatik mengikut panduan **WMO-No. 1203**.
-        4. **Eksport Data & Perbandingan:** Analisis stesen individu, bandingkan stesen serentak, atau muat turun data Excel/HTML.
+        4. **Eksport & Analisis:** Semak borang rekod Excel, visualisasi julat/anomali, perbandingan merentas stesen, atau muat turun fail berkaitan.
         """,
         "btn_download_wmo": "📥 Muat Turun WMO-No. 1203 (PDF)",
         "upload_label": "Muat naik fail siri masa AAWS (.xls / .xlsx)",
@@ -41,7 +41,7 @@ TEXTS = {
         "select_param": "Parameter Cerapan:",
         "param_rain": "🌧️ Hujan (Rainfall)",
         "param_temp": "🌡️ Suhu Udara (Temperature)",
-        "no_param_data": "⚠️ **Tiada data {param_name} dikesan.** Parameter dikesan dalam fail: **{detected_params}**. Sila tukar pilihan atau muat naik fail yang sepadan.",
+        "no_param_data": "⚠️ **Tiada data {param_name} dikesan.** Parameter dikesan dalam fail: **{detected_params}**. Sila tukar pilihan toggle atau muat naik fail yang sepadan.",
         "select_station": "Pilih Stesen Utama:",
         "station_name": "Stesen Cerapan",
         "record_period": "Tempoh Siri Masa",
@@ -228,7 +228,7 @@ with header_col2:
 st.divider()
 
 # ---------------------------------------------------------
-# 5. ENJIN PEMPROSESAN DATA & WMO
+# 5. ENJIN PEMPROSESAN DATA & PENGECAMAN PINTAR
 # ---------------------------------------------------------
 def detect_parameter_type(header_text):
     text_lower = header_text.lower()
@@ -244,6 +244,30 @@ def detect_parameter_type(header_text):
         return "Temperature"
     return "Rainfall"
 
+def extract_station_name(df, sheet_name, file_name):
+    # 1. Imbas 6 baris teratas untuk cari label station / stesen
+    for r in range(min(6, df.shape[0])):
+        for c in range(min(5, df.shape[1])):
+            cell_val = str(df.iloc[r, c]).strip()
+            if any(k in cell_val.lower() for k in ['station', 'stesen']):
+                if ':' in cell_val:
+                    parts = cell_val.split(':', 1)
+                    if len(parts) > 1 and parts[1].strip() and parts[1].strip().lower() != 'nan':
+                        return parts[1].strip().upper()
+                if c + 1 < df.shape[1]:
+                    next_val = str(df.iloc[r, c + 1]).strip()
+                    if next_val and next_val.lower() not in ['nan', 'none', '']:
+                        return next_val.upper()
+                        
+    # 2. Jika nama sheet ada teks bermakna
+    sheet_str = str(sheet_name).strip()
+    if sheet_str.lower() not in ['sheet1', 'sheet 1', 'datalist'] and not sheet_str.isdigit():
+        return sheet_str.upper()
+        
+    # 3. Fallback guna nama fail
+    base_file = file_name.replace(".xlsx", "").replace(".xls", "").strip()
+    return f"{base_file}_{sheet_name}".upper()
+
 def process_multiple_aaws_files(files_list):
     all_data = {"Rainfall": {}, "Temperature": {}}
     for file in files_list:
@@ -256,11 +280,8 @@ def process_multiple_aaws_files(files_list):
                 header_dump = " ".join([str(val) for val in df.iloc[:11, :].values.flatten()])
                 detected_param = detect_parameter_type(header_dump)
                 
-                raw_station_text = str(df.iloc[2, 0]) if df.shape[0] > 2 else "Station"
-                station_name = raw_station_text.split(':', 1)[1].strip() if ':' in raw_station_text else raw_station_text.replace("Station", "").strip()
-                if not station_name or station_name == "nan":
-                    station_name = f"Station_{sheet}"
-                    
+                station_name = extract_station_name(df, sheet, file.name)
+                
                 data = df.iloc[11:].copy().iloc[:, :4]
                 data.columns = ['Year', 'Month', 'Day', 'Value']
                 data['Year'] = pd.to_numeric(data['Year'], errors='coerce')
@@ -391,7 +412,7 @@ if uploaded_files:
     all_data = process_multiple_aaws_files(uploaded_files)
 
 # ---------------------------------------------------------
-# 6. TAB NAVIGASI KERJA
+# 6. TAB NAVIGASI UTAMA
 # ---------------------------------------------------------
 tab_analysis, tab_qc = st.tabs([
     t["nav_analysis"], 
@@ -462,7 +483,7 @@ with tab_analysis:
                 m1.metric(t["station_name"], selected_stesen)
                 m2.metric(t["record_period"], f"{min_yr} – {max_yr}")
                 m3.metric(t["completeness_rate"], f"{completeness_pct:.1f}%")
-                m4.metric(t["invalid_months"], f"{incomplete_months_count} / {total_months} Incomplete")
+                m4.metric(t["invalid_months"], f"{incomplete_months_count} / {total_months} Bulan")
                 
             if incomplete_months_count > 0:
                 st.warning(t["alert_incomplete"].format(count=incomplete_months_count, rule=qc_rule))
