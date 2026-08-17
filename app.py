@@ -31,7 +31,7 @@ TEXTS = {
         1. **Muat Naik Fail:** Masukkan fail raw AAWS (`.xls` / `.xlsx`) di menu bar sisi.
         2. **Pilih Parameter:** Gunakan butang di Zon Kawalan untuk bertukar antara **Hujan** dan **Suhu**.
         3. **Audit WMO:** Semakan integriti data hilang (`NA`) automatik mengikut panduan **WMO-No. 1203**.
-        4. **Eksport Data & Visual:** Jana borang Excel piawai atau muat turun graf `.HTML` interaktif.
+        4. **Eksport Data & Perbandingan:** Analisis stesen individu, bandingkan stesen serentak, atau muat turun data Excel/HTML.
         """,
         "btn_download_wmo": "📥 Muat Turun WMO-No. 1203 (PDF)",
         "upload_label": "Muat naik fail siri masa AAWS (.xls / .xlsx)",
@@ -42,7 +42,7 @@ TEXTS = {
         "param_rain": "🌧️ Hujan (Rainfall)",
         "param_temp": "🌡️ Suhu Udara (Temperature)",
         "no_param_data": "⚠️ **Tiada data {param_name} dikesan.** Parameter dikesan dalam fail: **{detected_params}**. Sila tukar pilihan atau muat naik fail yang sepadan.",
-        "select_station": "Pilih Stesen:",
+        "select_station": "Pilih Stesen Utama:",
         "station_name": "Stesen Cerapan",
         "record_period": "Tempoh Siri Masa",
         "completeness_rate": "Tahap Kesempurnaan",
@@ -50,6 +50,7 @@ TEXTS = {
         "alert_incomplete": "⚠️ **Perhatian Pegawai:** Terdapat **{count} bulan** tidak memenuhi piawaian kesempurnaan data ({rule}). Nilai bagi bulan berkenaan ditandakan sebagai `N.A (Incomplete)`.",
         "subtab_form": "📄 Borang Rekod Piawai & Eksport",
         "subtab_charts": "📈 Visualisasi Data & Analisis Julat",
+        "subtab_compare": "📊 Perbandingan Merentas Stesen",
         "download_excel": "📥 Muat Turun Excel ({station})",
         "download_chart_html": "📥 Muat Turun Graf Interaktif ({chart}) [.HTML]",
         "plot_type": "Pilih Perspektif Visual:",
@@ -71,6 +72,13 @@ TEXTS = {
         "axis_enable_custom": "Seragamkan / Kunci Skala Paksi Graf (Standardize Axis)",
         "axis_min_label": "Nilai Had Bawah (Min):",
         "axis_max_label": "Nilai Had Atas (Max):",
+        "compare_select_label": "Pilih Stesen-Stesen untuk Perbandingan (Pilih 2 atau lebih):",
+        "compare_plot_type": "Jenis Perbandingan:",
+        "compare_opt_normals": "Perbandingan Profil Purata Bulanan (Climatological Normals)",
+        "compare_opt_annual": "Perbandingan Siri Masa Trend Tahunan (Annual Comparison)",
+        "compare_title_normals": "Perbandingan Profil Purata Bulanan {param} Antara Stesen",
+        "compare_title_annual": "Perbandingan Trend Tahunan {param} Antara Stesen",
+        "compare_info": "💡 Sila pilih sekurang-kurangnya 2 stesen di atas untuk menjana perbandingan bertindih.",
         "qc_title": "Log Audit Integriti Data (WMO-No. 1203)",
         "qc_filter_failed": "🔍 Paparkan bulan tidak lengkap / ada data hilang (NA) sahaja",
         "download_qc_csv": "📥 Muat Turun Log Audit (.CSV)",
@@ -99,7 +107,7 @@ TEXTS = {
         1. **Upload Files:** Upload raw AAWS files (`.xls` / `.xlsx`) via the sidebar menu.
         2. **Select Parameter:** Switch dynamically between **Rainfall** and **Air Temperature**.
         3. **WMO Screening:** Missing data (`NA`) is audited automatically in compliance with **WMO-No. 1203**.
-        4. **Export Sheets & Visuals:** Generate Excel sheets or export interactive standalone `.HTML` charts.
+        4. **Multi-Station Analytics:** Analyze individual stations, perform multi-station overlays, or export data.
         """,
         "btn_download_wmo": "📥 Download WMO-No. 1203 (PDF)",
         "upload_label": "Upload AAWS time-series files (.xls / .xlsx)",
@@ -110,7 +118,7 @@ TEXTS = {
         "param_rain": "🌧️ Rainfall",
         "param_temp": "🌡️ Air Temperature",
         "no_param_data": "⚠️ **No {param_name} data detected.** Detected parameter in file: **{detected_params}**. Please switch toggle or upload matching data.",
-        "select_station": "Select Station:",
+        "select_station": "Select Primary Station:",
         "station_name": "Observation Station",
         "record_period": "Time-Series Period",
         "completeness_rate": "Completeness Level",
@@ -118,6 +126,7 @@ TEXTS = {
         "alert_incomplete": "⚠️ **Officer Advisory:** There are **{count} month(s)** failing completeness standards ({rule}). Values are flagged as `N.A (Incomplete)`.",
         "subtab_form": "📄 Standard Sheets & Export",
         "subtab_charts": "📈 Interactive Visuals & Range Analytics",
+        "subtab_compare": "📊 Multi-Station Comparison",
         "download_excel": "📥 Download Excel ({station})",
         "download_chart_html": "📥 Download Interactive Chart ({chart}) [.HTML]",
         "plot_type": "Select Visual Perspective:",
@@ -139,6 +148,13 @@ TEXTS = {
         "axis_enable_custom": "Standardize / Lock Graph Axis Range",
         "axis_min_label": "Lower Bound (Min):",
         "axis_max_label": "Upper Bound (Max):",
+        "compare_select_label": "Select Stations for Comparative Analysis (Choose 2 or more):",
+        "compare_plot_type": "Comparison View:",
+        "compare_opt_normals": "Monthly Climatological Normals Overlay",
+        "compare_opt_annual": "Annual Time-Series Trend Overlay",
+        "compare_title_normals": "Cross-Station Monthly Average Comparison ({param})",
+        "compare_title_annual": "Cross-Station Annual Trend Comparison ({param})",
+        "compare_info": "💡 Please select at least 2 stations above to generate comparative overlay charts.",
         "qc_title": "Data Integrity Audit Log (WMO-No. 1203)",
         "qc_filter_failed": "🔍 Show incomplete / missing data months only",
         "download_qc_csv": "📥 Download Audit Log (.CSV)",
@@ -412,7 +428,7 @@ with tab_analysis:
                 selected_stesen = st.selectbox(t["select_station"], options=list(stations_data.keys()))
                 
             with ctrl_col3:
-                st.write("")  # Alignment spacer
+                st.write("")
                 zip_buffer = io.BytesIO()
                 with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
                     for st_name, st_df in stations_data.items():
@@ -452,9 +468,13 @@ with tab_analysis:
                 st.warning(t["alert_incomplete"].format(count=incomplete_months_count, rule=qc_rule))
                 
             # -------------------------------------------------
-            # ZON 3: RUANG KERJA UTAMA (DUAL-VIEW WORKSPACE)
+            # ZON 3: RUANG KERJA UTAMA (TRIPLE-VIEW WORKSPACE)
             # -------------------------------------------------
-            sub_form, sub_plots = st.tabs([t["subtab_form"], t["subtab_charts"]])
+            sub_form, sub_plots, sub_compare = st.tabs([
+                t["subtab_form"], 
+                t["subtab_charts"],
+                t["subtab_compare"]
+            ])
             
             # SUB-VIEW 1: BORANG EXCEL
             with sub_form:
@@ -470,7 +490,6 @@ with tab_analysis:
                 
             # SUB-VIEW 2: VISUALISASI DATA & ANALISIS JULAT
             with sub_plots:
-                # Kawalan Pilihan Visual & Skim Warna
                 plot_ctrl1, plot_ctrl2 = st.columns([2, 1.2])
                 chart_options_map = {
                     t["opt_normals"]: "Normals_Range",
@@ -485,7 +504,6 @@ with tab_analysis:
                     default_idx = 0 if param_mode == "Rainfall" else 1
                     color_choice = st.selectbox(t["color_theme"], options=["Blues", "Thermal", "Viridis", "YlGnBu", "Spectral", "Plasma", "Teal"], index=default_idx)
                     
-                # Kawalan Skala Paksi Tersuai
                 with st.expander(t["axis_control_header"], expanded=False):
                     use_custom_axis = st.checkbox(t["axis_enable_custom"], value=False)
                     if use_custom_axis:
@@ -691,6 +709,104 @@ with tab_analysis:
                     * **Bacaan Harian Tertinggi:** `{max_day_val:.1f} {unit_str}` dicatatkan pada tarikh **{date_str}**.
                     * Petak kosong/putih menunjukkan hari tanpa cerapan hujan atau suhu minimum.
                     """)
+                    
+            # SUB-VIEW 3: PERBANDINGAN MERENTAS STESEN (MULTI-STATION OVERLAY)
+            with sub_compare:
+                all_station_names = list(stations_data.keys())
+                selected_compare_stations = st.multiselect(
+                    t["compare_select_label"],
+                    options=all_station_names,
+                    default=all_station_names[:min(3, len(all_station_names))]
+                )
+                
+                if len(selected_compare_stations) >= 2:
+                    comp_type = st.radio(
+                        t["compare_plot_type"],
+                        options=[t["compare_opt_normals"], t["compare_opt_annual"]],
+                        horizontal=True
+                    )
+                    
+                    month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+                    
+                    # 1. PERBANDINGAN PROFIL BULANAN (NORMALS OVERLAY)
+                    if comp_type == t["compare_opt_normals"]:
+                        fig_comp = go.Figure()
+                        palette = px.colors.qualitative.Plotly
+                        
+                        for idx, st_name in enumerate(selected_compare_stations):
+                            df_curr = stations_data[st_name]
+                            m_stats = df_curr.groupby('Month')['Value_Numeric'].mean().reset_index()
+                            m_stats['Month_Name'] = m_stats['Month'].apply(lambda x: month_names[x-1])
+                            
+                            col = palette[idx % len(palette)]
+                            fig_comp.add_trace(go.Scatter(
+                                x=m_stats['Month_Name'],
+                                y=m_stats['Value_Numeric'],
+                                mode='lines+markers',
+                                name=st_name,
+                                line=dict(width=2.5, color=col),
+                                marker=dict(size=7),
+                                hovertemplate=f'<b>{st_name}</b><br>Bulan: %{{x}}<br>Purata: %{{y:.1f}} {unit_str}<extra></extra>'
+                            ))
+                            
+                        fig_comp.update_layout(
+                            title=t["compare_title_normals"].format(param=param_mode),
+                            xaxis_title=t["axis_month"],
+                            yaxis_title=f"Purata {param_mode} ({unit_str})",
+                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                            margin=dict(l=20, r=20, t=50, b=20)
+                        )
+                        st.plotly_chart(fig_comp, use_container_width=True)
+                        
+                        html_comp = fig_comp.to_html(include_plotlyjs='cdn').encode('utf-8')
+                        st.download_button(
+                            label=t["download_chart_html"].format(chart="MultiStation_Normals"),
+                            data=html_comp,
+                            file_name=f"Perbandingan_Normals_{param_mode}.html",
+                            mime="text/html"
+                        )
+                        
+                    # 2. PERBANDINGAN TREND TAHUNAN (ANNUAL TREND OVERLAY)
+                    else:
+                        fig_comp_ann = go.Figure()
+                        palette = px.colors.qualitative.Plotly
+                        
+                        for idx, st_name in enumerate(selected_compare_stations):
+                            df_curr = stations_data[st_name]
+                            if param_mode == "Rainfall":
+                                y_stats = df_curr.groupby('Year')['Value_Numeric'].sum().reset_index()
+                            else:
+                                y_stats = df_curr.groupby('Year')['Value_Numeric'].mean().reset_index()
+                                
+                            col = palette[idx % len(palette)]
+                            fig_comp_ann.add_trace(go.Scatter(
+                                x=y_stats['Year'],
+                                y=y_stats['Value_Numeric'],
+                                mode='lines+markers',
+                                name=st_name,
+                                line=dict(width=2, color=col),
+                                marker=dict(size=6),
+                                hovertemplate=f'<b>{st_name}</b><br>Tahun: %{{x}}<br>Nilai: %{{y:.1f}} {unit_str}<extra></extra>'
+                            ))
+                            
+                        fig_comp_ann.update_layout(
+                            title=t["compare_title_annual"].format(param=param_mode),
+                            xaxis_title=t["axis_year"],
+                            yaxis_title=f"{'Jumlah Hujan' if param_mode=='Rainfall' else 'Purata Suhu'} ({unit_str})",
+                            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                            margin=dict(l=20, r=20, t=50, b=20)
+                        )
+                        st.plotly_chart(fig_comp_ann, use_container_width=True)
+                        
+                        html_comp_ann = fig_comp_ann.to_html(include_plotlyjs='cdn').encode('utf-8')
+                        st.download_button(
+                            label=t["download_chart_html"].format(chart="MultiStation_Annual"),
+                            data=html_comp_ann,
+                            file_name=f"Perbandingan_Annual_{param_mode}.html",
+                            mime="text/html"
+                        )
+                else:
+                    st.info(t["compare_info"])
     else:
         st.info(t["info_upload"])
 
