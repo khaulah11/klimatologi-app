@@ -253,20 +253,20 @@ def extract_station_name(df, sheet_name, file_name):
                 if ':' in cell_val:
                     parts = cell_val.split(':', 1)
                     if len(parts) > 1 and parts[1].strip() and parts[1].strip().lower() != 'nan':
-                        return parts[1].strip().upper()
+                        return parts[1].strip().lstrip(': -_').upper()
                 if c + 1 < df.shape[1]:
                     next_val = str(df.iloc[r, c + 1]).strip()
                     if next_val and next_val.lower() not in ['nan', 'none', '']:
-                        return next_val.upper()
+                        return next_val.lstrip(': -_').upper()
                         
     # 2. Jika nama sheet ada teks bermakna
     sheet_str = str(sheet_name).strip()
     if sheet_str.lower() not in ['sheet1', 'sheet 1', 'datalist'] and not sheet_str.isdigit():
-        return sheet_str.upper()
+        return sheet_str.lstrip(': -_').upper()
         
     # 3. Fallback guna nama fail
     base_file = file_name.replace(".xlsx", "").replace(".xls", "").strip()
-    return f"{base_file}_{sheet_name}".upper()
+    return f"{base_file}_{sheet_name}".lstrip(': -_').upper()
 
 def process_multiple_aaws_files(files_list):
     all_data = {"Rainfall": {}, "Temperature": {}}
@@ -327,12 +327,18 @@ def evaluate_month_qc(series, rule):
 def generate_qc_audit_table(df_station, rule, t_dict):
     qc_records = []
     month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-    for yr in sorted(df_station['Year'].unique()):
+    for yr in sorted(df_station['Year'].dropna().unique()):
         df_yr = df_station[df_station['Year'] == yr]
         pivot_num = df_yr.pivot(index='Day', columns='Month', values='Value_Numeric').reindex(index=range(1, 32), columns=range(1, 13))
         for m in range(1, 13):
             col_data = pivot_num[m]
-            is_valid, miss_cnt, max_consec = evaluate_month_qc(col_data, rule)
+            if rule == "No Filter (Raw Data)":
+                is_valid = True
+                miss_cnt = col_data.isna().sum()
+                max_consec = 0
+            else:
+                is_valid, miss_cnt, max_consec = evaluate_month_qc(col_data, rule)
+                
             status_str = t_dict["qc_status_perfect"] if miss_cnt == 0 else (t_dict["qc_status_valid"] if is_valid else t_dict["qc_status_incomp"])
             action_str = t_dict["qc_act_calc"] if is_valid else t_dict["qc_act_reject"]
             qc_records.append({
@@ -348,7 +354,7 @@ def generate_qc_audit_table(df_station, rule, t_dict):
 def generate_excel_for_station(station_name, df_station, rule, param_type):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        years = sorted(df_station['Year'].unique())
+        years = sorted(df_station['Year'].dropna().unique())
         month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
         has_written = False
         
@@ -356,6 +362,7 @@ def generate_excel_for_station(station_name, df_station, rule, param_type):
             df_yr = df_station[df_station['Year'] == yr]
             if df_yr.empty:
                 continue
+                
             pivot_num = df_yr.pivot(index='Day', columns='Month', values='Value_Numeric').reindex(index=range(1, 32), columns=range(1, 13))
             pivot_display = df_yr.pivot(index='Day', columns='Month', values='Value_Display').reindex(index=range(1, 32), columns=range(1, 13))
             
@@ -363,24 +370,48 @@ def generate_excel_for_station(station_name, df_station, rule, param_type):
             
             for m in range(1, 13):
                 col_data = pivot_num[m]
-                is_valid, _, _ = evaluate_month_qc(col_data, rule)
                 
-                if is_valid:
+                if rule == "No Filter (Raw Data)":
+                    is_valid = True
+                else:
+                    is_valid, _, _ = evaluate_month_qc(col_data, rule)
+                
+                has_valid_num = col_data.notna().any()
+                
+                if is_valid and has_valid_num:
                     if param_type == "Rainfall":
                         tot = col_data.sum(skipna=True)
                         stat_row1.append(round(tot, 1) if pd.notna(tot) else "N.A")
-                        stat_row2.append((col_data > 0.1).sum())
-                        stat_row3.append(round(col_data.max(skipna=True), 1) if pd.notna(col_data.max(skipna=True)) else "N.A")
-                        stat_row4.append(int(col_data.idxmax(skipna=True)) if pd.notna(col_data.idxmax(skipna=True)) else "-")
+                        stat_row2.append(int((col_data > 0.1).sum()))
+                        
+                        max_val = col_data.max(skipna=True)
+                        stat_row3.append(round(max_val, 1) if pd.notna(max_val) else "N.A")
+                        
+                        try:
+                            max_date = col_data.idxmax(skipna=True)
+                            stat_row4.append(int(max_date) if pd.notna(max_date) else "-")
+                        except Exception:
+                            stat_row4.append("-")
                     else:
                         mean_temp = col_data.mean(skipna=True)
+                        max_temp = col_data.max(skipna=True)
+                        min_temp = col_data.min(skipna=True)
+                        
                         stat_row1.append(round(mean_temp, 1) if pd.notna(mean_temp) else "N.A")
-                        stat_row2.append(round(col_data.max(skipna=True), 1) if pd.notna(col_data.max(skipna=True)) else "N.A")
-                        stat_row3.append(round(col_data.min(skipna=True), 1) if pd.notna(col_data.min(skipna=True)) else "N.A")
-                        rng = col_data.max(skipna=True) - col_data.min(skipna=True)
-                        stat_row4.append(round(rng, 1) if pd.notna(rng) else "N.A")
-                else:
+                        stat_row2.append(round(max_temp, 1) if pd.notna(max_temp) else "N.A")
+                        stat_row3.append(round(min_temp, 1) if pd.notna(min_temp) else "N.A")
+                        
+                        if pd.notna(max_temp) and pd.notna(min_temp):
+                            stat_row4.append(round(max_temp - min_temp, 1))
+                        else:
+                            stat_row4.append("N.A")
+                elif not is_valid:
                     stat_row1.append("N.A (Incomplete)")
+                    stat_row2.append("N.A")
+                    stat_row3.append("N.A")
+                    stat_row4.append("-")
+                else:
+                    stat_row1.append("N.A")
                     stat_row2.append("N.A")
                     stat_row3.append("N.A")
                     stat_row4.append("-")
@@ -399,11 +430,14 @@ def generate_excel_for_station(station_name, df_station, rule, param_type):
                 
             report_df.columns = month_names
             report_df.index.name = "DATE"
-            report_df.to_excel(writer, sheet_name=str(yr)[:31])
+            
+            sheet_title = str(yr)[:31]
+            report_df.to_excel(writer, sheet_name=sheet_title)
             has_written = True
             
         if not has_written:
-            pd.DataFrame({"Note": ["No Data"]}).to_excel(writer, sheet_name="No Data")
+            pd.DataFrame({"Note": ["Tiada data sah untuk dijana"]}).to_excel(writer, sheet_name="No Data")
+            
     output.seek(0)
     return output
 
@@ -608,11 +642,7 @@ with tab_analysis:
                     
                 # KANVAS 2: ANOMALI IKLIM (DIVERGING BAR)
                 elif chart_choice == "Anomaly":
-                    if param_mode == "Rainfall":
-                        annual_df = df_stesen.groupby('Year')['Value_Numeric'].sum().reset_index()
-                    else:
-                        annual_df = df_stesen.groupby('Year')['Value_Numeric'].mean().reset_index()
-                        
+                    annual_df = df_stesen.groupby('Year')['Value_Numeric'].agg('sum' if param_mode == "Rainfall" else 'mean').reset_index()
                     norm_mean = annual_df['Value_Numeric'].mean()
                     annual_df['Anomaly'] = annual_df['Value_Numeric'] - norm_mean
                     
@@ -655,13 +685,8 @@ with tab_analysis:
                     
                 # KANVAS 3: TREND SIRI MASA TAHUNAN
                 elif chart_choice == "Trend":
-                    if param_mode == "Rainfall":
-                        annual_df = df_stesen.groupby('Year')['Value_Numeric'].sum().reset_index()
-                        val_label = f"Jumlah Hujan ({unit_str})"
-                    else:
-                        annual_df = df_stesen.groupby('Year')['Value_Numeric'].mean().reset_index()
-                        val_label = f"Purata Suhu ({unit_str})"
-                        
+                    annual_df = df_stesen.groupby('Year')['Value_Numeric'].agg('sum' if param_mode == "Rainfall" else 'mean').reset_index()
+                    val_label = f"Jumlah Hujan ({unit_str})" if param_mode == "Rainfall" else f"Purata Suhu ({unit_str})"
                     mean_val = annual_df['Value_Numeric'].mean()
                     max_yr_row = annual_df.loc[annual_df['Value_Numeric'].idxmax()]
                     min_yr_row = annual_df.loc[annual_df['Value_Numeric'].idxmin()]
@@ -695,7 +720,7 @@ with tab_analysis:
                     
                 # KANVAS 4: MATRIKS KEAMATAN HARIAN (HEATMAP)
                 elif chart_choice == "Heatmap":
-                    years_list = sorted(df_stesen['Year'].unique())
+                    years_list = sorted(df_stesen['Year'].dropna().unique())
                     chosen_year = st.selectbox(t["select_year_heat"], options=years_list, index=len(years_list)-1)
                     df_heat = df_stesen[df_stesen['Year'] == chosen_year]
                     heat_pivot = df_heat.pivot(index='Day', columns='Month', values='Value_Numeric').reindex(index=range(1, 32), columns=range(1, 13))
@@ -721,7 +746,7 @@ with tab_analysis:
                     )
                     
                     max_day_val = df_heat['Value_Numeric'].max()
-                    max_day_date = df_heat.loc[df_heat['Value_Numeric'].idxmax()] if pd.notna(max_day_val) else None
+                    max_day_date = df_heat.loc[df_heat['Value_Numeric'].idxmax()] if (pd.notna(max_day_val) and not df_heat['Value_Numeric'].isna().all()) else None
                     date_str = f"{int(max_day_date['Day'])}/{int(max_day_date['Month'])}/{chosen_year}" if max_day_date is not None else "-"
                     
                     st.info(f"""
@@ -794,10 +819,7 @@ with tab_analysis:
                         
                         for idx, st_name in enumerate(selected_compare_stations):
                             df_curr = stations_data[st_name]
-                            if param_mode == "Rainfall":
-                                y_stats = df_curr.groupby('Year')['Value_Numeric'].sum().reset_index()
-                            else:
-                                y_stats = df_curr.groupby('Year')['Value_Numeric'].mean().reset_index()
+                            y_stats = df_curr.groupby('Year')['Value_Numeric'].agg('sum' if param_mode == "Rainfall" else 'mean').reset_index()
                                 
                             col = palette[idx % len(palette)]
                             fig_comp_ann.add_trace(go.Scatter(
