@@ -245,7 +245,6 @@ def detect_parameter_type(header_text):
     return "Rainfall"
 
 def extract_station_name(df, sheet_name, file_name):
-    # 1. Imbas 6 baris teratas untuk cari label station / stesen
     for r in range(min(6, df.shape[0])):
         for c in range(min(5, df.shape[1])):
             cell_val = str(df.iloc[r, c]).strip()
@@ -259,12 +258,10 @@ def extract_station_name(df, sheet_name, file_name):
                     if next_val and next_val.lower() not in ['nan', 'none', '']:
                         return next_val.lstrip(': -_').upper()
                         
-    # 2. Jika nama sheet ada teks bermakna
     sheet_str = str(sheet_name).strip()
     if sheet_str.lower() not in ['sheet1', 'sheet 1', 'datalist'] and not sheet_str.isdigit():
         return sheet_str.lstrip(': -_').upper()
         
-    # 3. Fallback guna nama fail
     base_file = file_name.replace(".xlsx", "").replace(".xls", "").strip()
     return f"{base_file}_{sheet_name}".lstrip(': -_').upper()
 
@@ -586,7 +583,9 @@ with tab_analysis:
                     }
                 }
                 
+                # -----------------------------------------------------------------
                 # KANVAS 1: PROFIL NORMAL & CARTA JULAT (RIBBON ENVELOPE)
+                # -----------------------------------------------------------------
                 if chart_choice == "Normals_Range":
                     month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
                     month_stats = df_stesen.groupby('Month')['Value_Numeric'].agg(['mean', 'min', 'max']).reset_index()
@@ -634,13 +633,21 @@ with tab_analysis:
                     dry_m = month_stats.loc[month_stats['mean'].idxmin()]
                     
                     st.info(f"""
-                    📌 **Rumusan Profil Bulanan & Carta Julat (Min–Maks):**
-                    * **Kawasan Berlorek (Ribbon):** Menunjukkan julat variabiliti antara bacaan minimum dan maksimum yang pernah direkodkan bagi setiap bulan sepanjang siri masa.
-                    * **Bulan Kemuncak (Peak Month):** Bulan **{peak_m['Month_Name']}** dengan purata tertinggi `{peak_m['mean']:.1f} {unit_str}` (Maks: `{peak_m['max']:.1f} {unit_str}`).
+                    📌 **Rumusan Profil Bulanan ({selected_stesen}):**
+                    * **Bulan Kemuncak (Peak Month):** Bulan **{peak_m['Month_Name']}** dengan purata `{peak_m['mean']:.1f} {unit_str}` (Maks: `{peak_m['max']:.1f} {unit_str}`).
                     * **Bulan Terendah:** Bulan **{dry_m['Month_Name']}** dengan purata `{dry_m['mean']:.1f} {unit_str}` (Min: `{dry_m['min']:.1f} {unit_str}`).
+                    * **Kawasan Berlorek (Ribbon):** Mewakili had sejarah minimum dan maksimum bagi setiap bulan.
+                    
+                    ---
+                    💡 **Justifikasi & Panduan Saintifik:**
+                    * **Struktur Paksi:** Paksi-X mewakili kitaran tahunan (JAN–DEC), paksi-Y menunjukkan nilai cerapan bulanan ({unit_str}).
+                    * **Fungsi Utama:** Memetakan taburan monsun bermusim serta mentakrifkan had batas kebolehubahan iklim (*climate variability boundary*).
+                    * **Kepentingan:** Membantu perancangan agrometeorologi, ramalan kemarau bermusim, dan pengurusan sumber air.
                     """)
                     
+                # -----------------------------------------------------------------
                 # KANVAS 2: ANOMALI IKLIM (DIVERGING BAR)
+                # -----------------------------------------------------------------
                 elif chart_choice == "Anomaly":
                     annual_df = df_stesen.groupby('Year')['Value_Numeric'].agg('sum' if param_mode == "Rainfall" else 'mean').reset_index()
                     norm_mean = annual_df['Value_Numeric'].mean()
@@ -678,12 +685,19 @@ with tab_analysis:
                     
                     st.info(f"""
                     📌 **Rumusan Anomali Iklim (Rujukan Normal: `{norm_mean:.1f} {unit_str}`):**
-                    * Garisan 0 mewakili purata normal iklim. Bar menunjukkan sisihan (*departure*) daripada purata jangka panjang.
                     * **Anomali Positif Tertinggi:** Tahun **{int(highest_anom['Year'])}** (`+{highest_anom['Anomaly']:.1f} {unit_str}`).
                     * **Anomali Negatif Terendah:** Tahun **{int(lowest_anom['Year'])}** (`{lowest_anom['Anomaly']:.1f} {unit_str}`).
+                    
+                    ---
+                    💡 **Justifikasi & Panduan Saintifik:**
+                    * **Struktur Paksi:** Paksi-X mewakili tahun siri masa, paksi-Y menunjukkan nilai sisihan (departure) daripada garis sifar purata normal.
+                    * **Fungsi Utama:** Mengenal pasti fasa lebihan air (*Wet Phase - Bar Biru*) berbanding fasa defisit/kemarau (*Dry Phase - Bar Merah*).
+                    * **Kepentingan:** Sangat kritikal untuk memantau impak fenomena makro-iklim seperti El Niño (kemarau) dan La Niña (banjir berpanjangan).
                     """)
                     
+                # -----------------------------------------------------------------
                 # KANVAS 3: TREND SIRI MASA TAHUNAN
+                # -----------------------------------------------------------------
                 elif chart_choice == "Trend":
                     annual_df = df_stesen.groupby('Year')['Value_Numeric'].agg('sum' if param_mode == "Rainfall" else 'mean').reset_index()
                     val_label = f"Jumlah Hujan ({unit_str})" if param_mode == "Rainfall" else f"Purata Suhu ({unit_str})"
@@ -716,9 +730,17 @@ with tab_analysis:
                     * **Purata Normal Jangka Panjang:** `{mean_val:.1f} {unit_str}` (garisan putus merah).
                     * **Tahun Tertinggi / Ekstrem:** Tahun **{int(max_yr_row['Year'])}** dengan nilai `{max_yr_row['Value_Numeric']:.1f} {unit_str}`.
                     * **Tahun Terendah:** Tahun **{int(min_yr_row['Year'])}** dengan nilai `{min_yr_row['Value_Numeric']:.1f} {unit_str}`.
+                    
+                    ---
+                    💡 **Justifikasi & Panduan Saintifik:**
+                    * **Struktur Paksi:** Paksi-X mewakili tahun rekod, paksi-Y menunjukkan jumlah pengumpulan tahunan ({unit_str}).
+                    * **Fungsi Utama:** Menilai variasi iklim antara tahun (*interannual variability*) berbanding garisan rujukan purata normal jangka panjang.
+                    * **Kepentingan:** Mengesan arah aliran perubahan iklim jangka panjang (*climatological trend*) bagi kawasan stesen.
                     """)
                     
+                # -----------------------------------------------------------------
                 # KANVAS 4: MATRIKS KEAMATAN HARIAN (HEATMAP)
+                # -----------------------------------------------------------------
                 elif chart_choice == "Heatmap":
                     years_list = sorted(df_stesen['Year'].dropna().unique())
                     chosen_year = st.selectbox(t["select_year_heat"], options=years_list, index=len(years_list)-1)
@@ -751,12 +773,19 @@ with tab_analysis:
                     
                     st.info(f"""
                     📌 **Rumusan Matriks Harian ({chosen_year}):**
-                    * Graf ini memaparkan corak keamatan harian sepanjang 12 bulan. Petak berwarna lebih gelap menandakan bacaan yang lebih tinggi.
-                    * **Bacaan Harian Tertinggi:** `{max_day_val:.1f} {unit_str}` dicatatkan pada tarikh **{date_str}**.
-                    * Petak kosong/putih menunjukkan hari tanpa cerapan hujan atau suhu minimum.
+                    * **Bacaan Harian Tertinggi:** `{max_day_val:.1f} {unit_str}` dicatatkan pada tarikh **{date_str}** (petak biru gelap).
+                    * **Petak Putih / Cerah:** Menunjukkan fasa hari kering tanpa hujan (0.0 mm).
+                    
+                    ---
+                    💡 **Justifikasi & Panduan Saintifik:**
+                    * **Struktur Paksi:** Paksi-X mewakili 12 bulan (JAN–DEC), paksi-Y menunjukkan hari cerapan (1–31).
+                    * **Fungsi Utama:** Memaparkan seluruh 365 hari dalam bentuk kalendar warna matriks 2D beresolusi tinggi.
+                    * **Kepentingan:** Menggantikan semakan jadual manual bagi mengesan tempoh hari kering berpanjangan (*dry spells*) atau tarikh ribut ekstrem secara terus.
                     """)
                     
+            # -----------------------------------------------------------------
             # SUB-VIEW 3: PERBANDINGAN MERENTAS STESEN (MULTI-STATION OVERLAY)
+            # -----------------------------------------------------------------
             with sub_compare:
                 all_station_names = list(stations_data.keys())
                 selected_compare_stations = st.multiselect(
@@ -812,6 +841,11 @@ with tab_analysis:
                             mime="text/html"
                         )
                         
+                        st.info(f"""
+                        💡 **Justifikasi Perbandingan Profil Bulanan:**
+                        * Membolehkan perbandingan regim monsun antara stesen di kawasan geografi berbeza (contohnya: stesen pantai barat vs pantai timur vs pedalaman Sabah).
+                        """)
+                        
                     # 2. PERBANDINGAN TREND TAHUNAN (ANNUAL TREND OVERLAY)
                     else:
                         fig_comp_ann = go.Figure()
@@ -848,6 +882,11 @@ with tab_analysis:
                             file_name=f"Perbandingan_Annual_{param_mode}.html",
                             mime="text/html"
                         )
+                        
+                        st.info(f"""
+                        💡 **Justifikasi Perbandingan Trend Tahunan:**
+                        * Membandingkan siri masa tahunan merentas stesen untuk mengenal pasti sama ada anomali cuaca berlaku secara setempat (*local micro-climate*) atau berskala negeri (*regional climate signal*).
+                        """)
                 else:
                     st.info(t["compare_info"])
     else:
